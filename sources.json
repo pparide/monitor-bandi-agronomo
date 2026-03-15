@@ -1,5 +1,10 @@
 [
   {
+    "name": "Comune di Pellezzano",
+    "url": "https://www.comune.pellezzano.sa.it/it/page/bandi-gare-e-manifestazioni-di-interesse-21-02-2022-2023",
+    "type": "pdf_archive"
+  },
+  {
     "name": "Comune di Salerno",
     "url": "https://albofornitori.comune.salerno.it/PortaleAppalti/it/ppgare_bandi_lista.wp",
     "type": "portale_appalti"
@@ -15,9 +20,34 @@
     "type": "traspare"
   },
   {
-    "name": "Comune di Pellezzano",
-    "url": "https://www.comune.pellezzano.sa.it/it/page/bandi-gare-e-manifestazioni-di-interesse-21-02-2022-2023",
-    "type": "pdf_archive"
+    "name": "Comune di Cava de' Tirreni",
+    "url": "https://cavadetirreni.traspare.com/announcements",
+    "type": "traspare"
+  },
+  {
+    "name": "Comune di Battipaglia",
+    "url": "https://battipaglia.traspare.com/announcements",
+    "type": "traspare"
+  },
+  {
+    "name": "Comune di Eboli",
+    "url": "https://eboli.traspare.com/announcements",
+    "type": "traspare"
+  },
+  {
+    "name": "Comune di Agropoli",
+    "url": "https://agropoli.traspare.com/announcements",
+    "type": "traspare"
+  },
+  {
+    "name": "Comune di Sapri",
+    "url": "https://sapri.traspare.com/announcements",
+    "type": "traspare"
+  },
+  {
+    "name": "Parco Nazionale del Cilento",
+    "url": "https://www.cilentoediano.it/bandi-di-gara/",
+    "type": "html_list"
   },
   {
     "name": "Regione Campania Agricoltura",
@@ -25,12 +55,17 @@
     "type": "html_list"
   },
   {
-    "name": "Università di Salerno",
-    "url": "https://web.unisa.it/home/bandi/concorsi-selezioni/collaborazioni",
-    "type": "university"
+    "name": "Regione Campania Gare",
+    "url": "https://www.regione.campania.it/regione/it/amministrazione-trasparente/bandi-di-gara-e-contratti",
+    "type": "html_list"
   },
   {
-    "name": "ASMECOMM",
+    "name": "Università di Salerno Collaborazioni",
+    "url": "https://web.unisa.it/home/bandi/concorsi-selezioni/collaborazioni",
+    "type": "html_list"
+  },
+  {
+    "name": "ASMECOMM Gare",
     "url": "https://piattaforma.asmecomm.it/gare/",
     "type": "html_list"
   }
