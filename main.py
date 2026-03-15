@@ -96,7 +96,6 @@ def is_candidate_link(link):
 
 
 def page_text(url):
-
     try:
         r = requests.get(url, timeout=20)
 
@@ -113,7 +112,6 @@ def page_text(url):
 
 
 def looks_like_archive_or_result(link, text):
-
     combined = (link + " " + text).lower()
 
     bad_words = [
@@ -132,7 +130,6 @@ def looks_like_archive_or_result(link, text):
 
 
 def main():
-
     sources = load_json("sources.json", [])
     keywords = load_json("keywords.json", {"include": [], "exclude": []})
     seen = load_json("seen.json", [])
@@ -142,11 +139,9 @@ def main():
 
     found = []
     updated_seen = list(seen)
-
     debug_lines = []
 
     for source in sources:
-
         source_name = source.get("name", "fonte")
         source_url = source.get("url", "")
 
@@ -159,19 +154,15 @@ def main():
         raw_links = extract_links(source_url, soup)
 
         candidate_links = []
-
         for link in raw_links:
-
             if not is_candidate_link(link):
                 continue
-
             if link not in candidate_links:
                 candidate_links.append(link)
 
         matched = 0
 
         for link in candidate_links:
-
             if link in seen:
                 continue
 
@@ -200,29 +191,27 @@ def main():
             )
 
             updated_seen.append(link)
-
             matched += 1
 
         debug_lines.append(
             f"{source_name}: link totali={len(raw_links)} candidati={len(candidate_links)} trovati={matched}"
         )
 
+    message_parts = []
+
     if found:
-
-        message = "\n\n".join(found[:10])
-
+        message_parts.append("\n\n".join(found[:10]))
         if len(found) > 10:
-            message += f"\n\n... altri {len(found)-10} risultati."
-
-        send_telegram_message(message)
+            message_parts.append(f"... altri {len(found) - 10} risultati.")
 
         save_json("seen.json", updated_seen)
-
     else:
+        message_parts.append("Nessun nuovo bando locale trovato.")
 
-        debug_message = "DEBUG monitor locale\n\n" + "\n".join(debug_lines[:20])
+    message_parts.append("DEBUG monitor locale\n\n" + "\n".join(debug_lines[:20]))
 
-        send_telegram_message(debug_message)
+    final_message = "\n\n".join(message_parts)
+    send_telegram_message(final_message)
 
 
 if __name__ == "__main__":
