@@ -2,7 +2,7 @@ import json
 import os
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
 TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
@@ -30,20 +30,10 @@ def send_telegram_message(text):
     requests.post(url, data=data, timeout=20)
 
 
-def get_response(url):
-    try:
-        r = requests.get(url, timeout=20, allow_redirects=True)
-        r.raise_for_status()
-        return r
-    except Exception:
-        return None
-
-
 def get_page(url):
-    r = get_response(url)
-    if not r:
-        return None
     try:
+        r = requests.get(url, timeout=20)
+        r.raise_for_status()
         return BeautifulSoup(r.text, "html.parser")
     except Exception:
         return None
@@ -54,12 +44,12 @@ def extract_links(base_url, soup):
 
     for a in soup.find_all("a", href=True):
         href = a["href"].strip()
+
         if not href:
             continue
 
         full = urljoin(base_url, href)
 
-        # Tieni solo http/https
         if not full.startswith("http"):
             continue
 
@@ -68,76 +58,63 @@ def extract_links(base_url, soup):
     return list(links)
 
 
-def normalize_link(link):
-    # Rimuove eventuale fragment finale
-    return link.split("#")[0].strip()
-
-
-def is_pdf_link(link):
-    return ".pdf" in link.lower()
-
-
 def is_candidate_link(link):
-    l = link.lower()
+    link = link.lower()
 
-    positive_markers = [
+    positive = [
         "bando",
         "gara",
         "avviso",
-        "procedura",
-        "manifestazione",
+        "appalto",
         "incarico",
         "affidamento",
-        "appalto",
-        "bandi",
+        "procedura",
+        "manifestazione",
         "contratti",
         "trasparenza",
-        "announcements",
-        "dettaglio",
+        "bandi",
+        ".pdf",
         "news",
-        "articolo",
-        ".pdf"
+        "dettaglio"
     ]
 
-    negative_markers = [
+    negative = [
         "facebook",
         "instagram",
         "linkedin",
-        "youtube",
-        "mailto:",
+        "mailto",
         "tel:",
         "/feed",
         "/tag/",
         "/category/"
     ]
 
-    if any(x in l for x in negative_markers):
+    if any(x in link for x in negative):
         return False
 
-    return any(x in l for x in positive_markers)
+    return any(x in link for x in positive)
 
 
 def page_text(url):
-    r = get_response(url)
-    if not r:
-        return ""
-
-    content_type = r.headers.get("Content-Type", "").lower()
-
-    # Se è PDF, per ora non lo leggiamo davvero come testo.
-    # Lo consideriamo però candidato in base a titolo/link.
-    if "application/pdf" in content_type or url.lower().endswith(".pdf"):
-        return f"pdf document {url.lower()}"
 
     try:
+        r = requests.get(url, timeout=20)
+
+        content_type = r.headers.get("Content-Type", "").lower()
+
+        if "pdf" in content_type or url.lower().endswith(".pdf"):
+            return url.lower()
+
         soup = BeautifulSoup(r.text, "html.parser")
         return soup.get_text(" ", strip=True).lower()
+
     except Exception:
         return ""
 
 
 def looks_like_archive_or_result(link, text):
-    combined = f"{link.lower()} {text.lower()}"
+
+    combined = (link + " " + text).lower()
 
     bad_words = [
         "esito",
@@ -146,18 +123,16 @@ def looks_like_archive_or_result(link, text):
         "aggiudicazione",
         "graduatoria",
         "convocazione",
-        "nomina commissione",
-        "commissione esaminatrice",
+        "commissione",
         "ammissione candidati",
-        "rettifica esito",
-        "presa d'atto",
-        "approvazione atti"
+        "presa d'atto"
     ]
 
     return any(word in combined for word in bad_words)
 
 
 def main():
+
     sources = load_json("sources.json", [])
     keywords = load_json("keywords.json", {"include": [], "exclude": []})
     seen = load_json("seen.json", [])
@@ -168,32 +143,35 @@ def main():
     found = []
     updated_seen = list(seen)
 
+    debug_lines = []
+
     for source in sources:
-        source_name = source.get("name", "Fonte senza nome")
+
+        source_name = source.get("name", "fonte")
         source_url = source.get("url", "")
 
-        if not source_url:
-            continue
-
         soup = get_page(source_url)
+
         if not soup:
+            debug_lines.append(f"{source_name}: pagina non leggibile")
             continue
 
         raw_links = extract_links(source_url, soup)
+
         candidate_links = []
 
-        for raw_link in raw_links:
-            link = normalize_link(raw_link)
+        for link in raw_links:
 
             if not is_candidate_link(link):
                 continue
 
-            if link in candidate_links:
-                continue
+            if link not in candidate_links:
+                candidate_links.append(link)
 
-            candidate_links.append(link)
+        matched = 0
 
         for link in candidate_links:
+
             if link in seen:
                 continue
 
@@ -223,15 +201,28 @@ def main():
 
             updated_seen.append(link)
 
+            matched += 1
+
+        debug_lines.append(
+            f"{source_name}: link totali={len(raw_links)} candidati={len(candidate_links)} trovati={matched}"
+        )
+
     if found:
+
         message = "\n\n".join(found[:10])
 
-        # Se ci sono più di 10 risultati, manda un avviso finale
         if len(found) > 10:
-            message += f"\n\n...e altri {len(found) - 10} risultati."
+            message += f"\n\n... altri {len(found)-10} risultati."
 
         send_telegram_message(message)
+
         save_json("seen.json", updated_seen)
+
+    else:
+
+        debug_message = "DEBUG monitor locale\n\n" + "\n".join(debug_lines[:20])
+
+        send_telegram_message(debug_message)
 
 
 if __name__ == "__main__":
