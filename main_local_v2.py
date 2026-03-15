@@ -1,6 +1,7 @@
 import json
 import os
 import re
+from datetime import datetime, timedelta
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
@@ -66,7 +67,22 @@ def get_text_from_page(url):
 
     return soup.get_text(" ", strip=True)[:300]
 
+def is_recent(text, days=120):
+    today = datetime.today()
+    limit = today - timedelta(days=days)
 
+    pattern = r"\b\d{2}/\d{2}/\d{4}\b"
+
+    for match in re.findall(pattern, text):
+        try:
+            d = datetime.strptime(match, "%d/%m/%Y")
+            if d >= limit:
+                return True
+        except:
+            pass
+
+    return False
+    
 def is_relevant(title):
     text = title.lower()
 
@@ -87,7 +103,11 @@ def is_relevant(title):
         "idraulico forest",
         "sistemazione idraulico",
         "ingegneria naturalistica",
-        "landscape"
+        "landscape",
+        "idraulico",
+        "difesa del suolo",
+        "assetto idrogeologico",
+        "forestazione"
     ]
 
     technical_keywords = [
@@ -302,9 +322,15 @@ def parse_traspare(source):
 
         title = a.get_text(" ", strip=True)
 
+        page_text = get_text_from_page(link)
+
         # Se il titolo del link è vuoto o povero, leggiamo la scheda
         if not title or len(title) < 8:
-            title = get_text_from_page(link)
+            title = page_text
+
+        # Teniamo solo gare recenti
+        if not is_recent(page_text):
+            continue
 
         results.append(
             {
@@ -387,6 +413,7 @@ def main():
             debug.append(f"{source_name}: risultati parser={len(results)}")
             all_results.extend(results)
 
+        debug.append(f"totale risultati grezzi: {len(all_results)}")
         new_items = []
         seen_keys_run = set()
 
