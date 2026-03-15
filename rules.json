@@ -1,25 +1,27 @@
 {
   "positive": {
-    "agronom": 5,
-    "forestale": 5,
-    "verde urbano": 6,
-    "ambientale": 3,
-    "servizi di ingegneria": 4,
-    "progettazione": 3,
+    "agronom": 6,
+    "forestale": 6,
+    "verde": 4,
     "alberature": 6,
     "vta": 8,
-    "piano del verde": 8,
-    "rinaturalizzazione": 5,
-    "sistemazione idraulico forestale": 6
+    "valutazione stabilità": 8,
+    "ambientale": 4,
+    "ingegneria": 3,
+    "servizi": 3,
+    "progettazione": 3,
+    "territorio": 3,
+    "manutenzione": 2
   },
   "negative": {
     "verbale": -10,
     "esito": -10,
     "aggiudicazione": -10,
     "graduatoria": -10,
-    "convocazione": -8,
+    "commissione": -6,
+    "convocazione": -6,
     "tempo indeterminato": -8,
     "assegno di ricerca": -8
   },
-  "threshold": 6
+  "threshold": 5
 }
