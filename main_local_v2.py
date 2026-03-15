@@ -29,12 +29,10 @@ def send_telegram(text):
 
 
 def get_page(url):
-
     try:
         r = requests.get(url, headers=HEADERS, timeout=30)
         r.raise_for_status()
         return BeautifulSoup(r.text, "html.parser")
-
     except:
         return None
 
@@ -45,13 +43,11 @@ def get_page(url):
 
 
 def parse_pdf_archive(source):
-
     soup = get_page(source["url"])
 
     if not soup:
         return []
 
-    # Documenti che ci fanno capire che la pagina contiene davvero una gara
     good_words = [
         "bando",
         "avviso",
@@ -68,7 +64,6 @@ def parse_pdf_archive(source):
     found_titles = []
 
     for a in soup.find_all("a", href=True):
-
         href = a["href"]
         title = a.get_text(strip=True)
 
@@ -80,11 +75,9 @@ def parse_pdf_archive(source):
         if any(word in text for word in good_words):
             found_titles.append(title if title else "Documento di gara")
 
-    # Se non troviamo documenti principali, non segnaliamo nulla
     if not found_titles:
         return []
 
-    # Scegliamo il titolo migliore da mostrare
     priority_order = [
         "bando",
         "avviso",
@@ -122,7 +115,6 @@ def parse_pdf_archive(source):
 
 
 def parse_html_list(source):
-
     soup = get_page(source["url"])
 
     if not soup:
@@ -131,7 +123,6 @@ def parse_html_list(source):
     results = []
 
     for a in soup.find_all("a", href=True):
-
         href = a["href"]
         title = a.get_text(strip=True)
 
@@ -168,7 +159,6 @@ def parse_html_list(source):
 
 
 def parse_traspare(source):
-
     soup = get_page(source["url"])
 
     if not soup:
@@ -177,11 +167,10 @@ def parse_traspare(source):
     results = []
 
     for a in soup.find_all("a", href=True):
-
         href = a["href"]
         title = a.get_text(strip=True)
 
-        if "announcement" not in href and "gara" not in href:
+        if "announcement" not in href.lower() and "gara" not in href.lower():
             continue
 
         link = urljoin(source["url"], href)
@@ -203,7 +192,6 @@ def parse_traspare(source):
 
 
 def parse_portale_appalti(source):
-
     soup = get_page(source["url"])
 
     if not soup:
@@ -212,13 +200,12 @@ def parse_portale_appalti(source):
     results = []
 
     for a in soup.find_all("a", href=True):
-
         href = a["href"]
         title = a.get_text(strip=True)
 
         text = (title + href).lower()
 
-        if "bando" not in text and "gara" not in text:
+        if "bando" not in text and "gara" not in text and "avviso" not in text:
             continue
 
         link = urljoin(source["url"], href)
@@ -240,81 +227,64 @@ def parse_portale_appalti(source):
 
 
 def main():
-
     sources = load_json("sources.json", [])
     seen = load_json("seen.json", [])
 
     all_results = []
-
     debug = []
 
     for source in sources:
-
         if source["type"] == "pdf_archive":
             results = parse_pdf_archive(source)
-
         elif source["type"] == "html_list":
             results = parse_html_list(source)
-
         elif source["type"] == "traspare":
             results = parse_traspare(source)
-
         elif source["type"] == "portale_appalti":
             results = parse_portale_appalti(source)
-
         else:
             results = []
 
         debug.append(f"{source['name']}: trovati {len(results)} link")
-
         all_results.extend(results)
 
     new_items = []
+    seen_links_run = set()
 
-   seen_links_run = set()
+    for item in all_results:
+        link = item["link"]
 
-for item in all_results:
+        # evita duplicati nello stesso run
+        if link in seen_links_run:
+            continue
 
-    link = item["link"]
+        # evita duplicati tra run diversi
+        if link in seen:
+            continue
 
-    # evita duplicati nello stesso run
-    if link in seen_links_run:
-        continue
-
-    # evita duplicati tra run diversi
-    if link in seen:
-        continue
-
-    new_items.append(item)
-
-    seen.append(link)
-    seen_links_run.add(link)
+        new_items.append(item)
+        seen.append(link)
+        seen_links_run.add(link)
 
     save_json("seen.json", seen)
 
     if not new_items:
-
         send_telegram(
             "Monitor bandi\n\nNessun nuovo bando trovato.\n\n"
             + "\n".join(debug)
         )
-
         return
 
     message = "Monitor bandi – nuovi risultati\n\n"
 
-    for item in new_items[:10]:
-
+    for item in new_items:
         message += (
             f"{item['source']}\n"
             f"{item['title']}\n"
             f"{item['link']}\n\n"
         )
 
-    if len(new_items) > 10:
-        message += f"... altri {len(new_items)-10} risultati"
-
-    message += "\nDEBUG\n" + "\n".join(debug)
+    message += "DEBUG\n" + "\n".join(debug)
 
     send_telegram(message)
 
