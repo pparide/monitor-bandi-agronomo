@@ -3,6 +3,8 @@ import os
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+import io
+from PyPDF2 import PdfReader
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
 TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
@@ -73,6 +75,50 @@ def extract_links(base_url, soup):
     return links
 
 
+def read_pdf(url):
+
+    try:
+
+        r = requests.get(url, headers=HEADERS, timeout=30)
+
+        pdf = PdfReader(io.BytesIO(r.content))
+
+        text = ""
+
+        for page in pdf.pages[:5]:
+            try:
+                text += page.extract_text() or ""
+            except:
+                pass
+
+        return text.lower()
+
+    except:
+        return ""
+
+
+def read_html(url):
+
+    try:
+
+        r = requests.get(url, headers=HEADERS, timeout=25)
+
+        soup = BeautifulSoup(r.text, "html.parser")
+
+        return soup.get_text(" ", strip=True).lower()
+
+    except:
+        return ""
+
+
+def read_content(url):
+
+    if url.lower().endswith(".pdf"):
+        return read_pdf(url)
+
+    return read_html(url)
+
+
 def score_text(text, rules):
 
     score = 0
@@ -111,7 +157,7 @@ def main():
 
         links = extract_links(url, soup)
 
-        links = links[:50]  # bootstrap anti-archivio
+        links = links[:30]  # limita archivio
 
         matches = 0
 
@@ -123,7 +169,9 @@ def main():
             if link in seen:
                 continue
 
-            combined = f"{title} {link}".lower()
+            content = read_content(link)
+
+            combined = f"{title} {link} {content}".lower()
 
             score = score_text(combined, rules)
 
