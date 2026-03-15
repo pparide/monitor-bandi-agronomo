@@ -1,0 +1,27 @@
+{
+  "include": [
+    "servizi di ingegneria",
+    "servizi di architettura",
+    "consulenza ambientale",
+    "pianificazione territoriale",
+    "piano del verde",
+    "forest",
+    "rinaturalizzazione",
+    "difesa del suolo",
+    "ingegneria naturalistica",
+    "valutazione ambientale",
+    "via",
+    "vas",
+    "vinca",
+    "verde urbano",
+    "gestione alberature",
+    "studio ambientale"
+  ],
+  "exclude": [
+    "assunzione",
+    "tempo indeterminato",
+    "concorso pubblico",
+    "fornitura",
+    "servizi di pulizia"
+  ]
+}
