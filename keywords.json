@@ -1,0 +1,30 @@
+{
+  "include": [
+    "agronomo",
+    "forestale",
+    "verde urbano",
+    "alberature",
+    "vta",
+    "piano del verde",
+    "ambientale",
+    "ingegneria naturalistica",
+    "servizi tecnici",
+    "censimento alberi",
+    "forestazione",
+    "consulenza tecnica",
+    "studio agronomico",
+    "parco",
+    "rigenerazione urbana"
+  ],
+  "exclude": [
+    "tempo indeterminato",
+    "assegno di ricerca",
+    "dottorato",
+    "ricercatore",
+    "professore associato",
+    "mobilità",
+    "full time",
+    "scaduto",
+    "bando chiuso"
+  ]
+}
