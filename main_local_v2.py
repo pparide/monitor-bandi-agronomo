@@ -389,6 +389,7 @@ def main():
     try:
         sources = load_json("sources.json", [])
         seen = load_json("seen.json", [])
+        health = load_health()
 
         debug.append(f"fonti caricate: {len(sources)}")
         debug.append(f"seen caricati: {len(seen)}")
@@ -414,6 +415,20 @@ def main():
             all_results.extend(results)
 
         debug.append(f"totale risultati grezzi: {len(all_results)}")
+        previous_zero_runs = health.get(source_name, {}).get("zero_runs", 0)
+
+if len(results) == 0:
+    zero_runs = previous_zero_runs + 1
+else:
+    zero_runs = 0
+
+health[source_name] = {
+    "last_results": len(results),
+    "zero_runs": zero_runs
+}
+
+if zero_runs >= 3:
+    debug.append(f"⚠️ POSSIBILE PROBLEMA STRUTTURA O URL: {source_name} ha 0 risultati da {zero_runs} run consecutivi")
         new_items = []
         seen_keys_run = set()
 
@@ -436,6 +451,12 @@ def main():
         debug.append(f"nuovi risultati dopo deduplica: {len(new_items)}")
 
         save_json("seen.json", seen)
+        def load_health():
+        return load_json("source_health.json", {})
+
+
+def save_health(data):
+    save_json("source_health.json", data)
         debug.append("seen.json salvato")
 
         if not new_items:
