@@ -14,7 +14,7 @@ def load_json(path, default):
     try:
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
-    except:
+    except Exception:
         return default
 
 
@@ -25,7 +25,13 @@ def save_json(path, data):
 
 def send_telegram(text):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": text})
+    r = requests.post(
+        url,
+        data={"chat_id": TELEGRAM_CHAT_ID, "text": text},
+        timeout=20
+    )
+    print("Telegram status:", r.status_code)
+    print("Telegram response:", r.text)
 
 
 def get_page(url):
@@ -33,13 +39,8 @@ def get_page(url):
         r = requests.get(url, headers=HEADERS, timeout=30)
         r.raise_for_status()
         return BeautifulSoup(r.text, "html.parser")
-    except:
+    except Exception:
         return None
-
-
-# -----------------------------
-# PARSER PDF ARCHIVE
-# -----------------------------
 
 
 def parse_pdf_archive(source):
@@ -109,11 +110,6 @@ def parse_pdf_archive(source):
     ]
 
 
-# -----------------------------
-# PARSER HTML LIST
-# -----------------------------
-
-
 def parse_html_list(source):
     soup = get_page(source["url"])
 
@@ -153,11 +149,6 @@ def parse_html_list(source):
     return results
 
 
-# -----------------------------
-# PARSER TRASPARE
-# -----------------------------
-
-
 def parse_traspare(source):
     soup = get_page(source["url"])
 
@@ -170,7 +161,9 @@ def parse_traspare(source):
         href = a["href"]
         title = a.get_text(strip=True)
 
-        if "announcement" not in href.lower() and "gara" not in href.lower():
+        h = href.lower()
+
+        if "announcement" not in h and "gara" not in h and "announcements" not in h:
             continue
 
         link = urljoin(source["url"], href)
@@ -184,11 +177,6 @@ def parse_traspare(source):
         )
 
     return results
-
-
-# -----------------------------
-# PARSER PORTALE APPALTI
-# -----------------------------
 
 
 def parse_portale_appalti(source):
@@ -221,72 +209,87 @@ def parse_portale_appalti(source):
     return results
 
 
-# -----------------------------
-# MAIN
-# -----------------------------
-
-
 def main():
-    sources = load_json("sources.json", [])
-    seen = load_json("seen.json", [])
-
-    all_results = []
     debug = []
+    try:
+        debug.append("main avviato")
 
-    for source in sources:
-        if source["type"] == "pdf_archive":
-            results = parse_pdf_archive(source)
-        elif source["type"] == "html_list":
-            results = parse_html_list(source)
-        elif source["type"] == "traspare":
-            results = parse_traspare(source)
-        elif source["type"] == "portale_appalti":
-            results = parse_portale_appalti(source)
-        else:
-            results = []
+        sources = load_json("sources.json", [])
+        seen = load_json("seen.json", [])
 
-        debug.append(f"{source['name']}: trovati {len(results)} link")
-        all_results.extend(results)
+        debug.append(f"fonti caricate: {len(sources)}")
+        debug.append(f"seen caricati: {len(seen)}")
 
-    new_items = []
-    seen_links_run = set()
+        all_results = []
 
-    for item in all_results:
-        link = item["link"]
+        for source in sources:
+            source_type = source.get("type", "")
+            source_name = source.get("name", "fonte")
 
-        # evita duplicati nello stesso run
-        if link in seen_links_run:
-            continue
+            if source_type == "pdf_archive":
+                results = parse_pdf_archive(source)
+            elif source_type == "html_list":
+                results = parse_html_list(source)
+            elif source_type == "traspare":
+                results = parse_traspare(source)
+            elif source_type == "portale_appalti":
+                results = parse_portale_appalti(source)
+            else:
+                results = []
 
-        # evita duplicati tra run diversi
-        if link in seen:
-            continue
+            debug.append(f"{source_name}: risultati parser={len(results)}")
+            all_results.extend(results)
 
-        new_items.append(item)
-        seen.append(link)
-        seen_links_run.add(link)
+        debug.append(f"risultati totali raccolti: {len(all_results)}")
 
-    save_json("seen.json", seen)
+        new_items = []
+        seen_links_run = set()
 
-    if not new_items:
-        send_telegram(
-            "Monitor bandi\n\nNessun nuovo bando trovato.\n\n"
-            + "\n".join(debug)
-        )
-        return
+        for item in all_results:
+            link = item["link"]
 
-    message = "Monitor bandi – nuovi risultati\n\n"
+            if link in seen_links_run:
+                continue
 
-    for item in new_items:
-        message += (
-            f"{item['source']}\n"
-            f"{item['title']}\n"
-            f"{item['link']}\n\n"
-        )
+            if link in seen:
+                continue
 
-    message += "DEBUG\n" + "\n".join(debug)
+            new_items.append(item)
+            seen.append(link)
+            seen_links_run.add(link)
 
-    send_telegram(message)
+        debug.append(f"nuovi risultati dopo deduplica: {len(new_items)}")
+
+        save_json("seen.json", seen)
+        debug.append("seen.json salvato")
+
+        if not new_items:
+            send_telegram(
+                "Monitor bandi\n\nNessun nuovo bando trovato.\n\nDEBUG\n\n"
+                + "\n".join(debug)
+            )
+            return
+
+        message = "Monitor bandi – nuovi risultati\n\n"
+
+        for item in new_items:
+            message += (
+                f"{item['source']}\n"
+                f"{item['title']}\n"
+                f"{item['link']}\n\n"
+            )
+
+        message += "DEBUG\n" + "\n".join(debug)
+
+        send_telegram(message)
+
+    except Exception as e:
+        debug.append(f"ERRORE: {repr(e)}")
+        try:
+            send_telegram("Monitor bandi\n\nDEBUG ERRORE\n\n" + "\n".join(debug))
+        except Exception:
+            print("Errore anche nell'invio Telegram finale")
+            print("\n".join(debug))
 
 
 if __name__ == "__main__":
