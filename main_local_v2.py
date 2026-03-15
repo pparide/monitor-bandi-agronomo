@@ -58,12 +58,13 @@ def get_page(url):
 
 
 def parse_pdf_archive(source):
+
     soup = get_page(source["url"])
 
     if not soup:
         return []
 
-    good_words = [
+    main_doc_keywords = [
         "bando",
         "avviso",
         "disciplinare",
@@ -76,53 +77,44 @@ def parse_pdf_archive(source):
         "determina"
     ]
 
-    found_titles = []
+    ignore_keywords = [
+        "tav",
+        "tavola",
+        "computo",
+        "cronoprogramma",
+        "psc",
+        "piano di sicurezza",
+        "piano manutenzione",
+        "elenco prezzi",
+        "relazione tecnica",
+        "schema",
+        "grafico"
+    ]
+
+    results = []
 
     for a in soup.find_all("a", href=True):
+
         href = a["href"]
         title = a.get_text(strip=True)
 
         if ".pdf" not in href.lower():
             continue
 
-        text = (title + " " + href).lower()
+        text = f"{title} {href}".lower()
 
-        if any(word in text for word in good_words):
-            found_titles.append(title if title else "Documento di gara")
-
-    if not found_titles:
-        return []
-
-    priority_order = [
-        "bando",
-        "avviso",
-        "disciplinare",
-        "manifestazione",
-        "affidamento",
-        "incarico",
-        "capitolato",
-        "determina"
-    ]
-
-    best_title = found_titles[0]
-
-    for keyword in priority_order:
-        for title in found_titles:
-            if keyword in title.lower():
-                best_title = title
-                break
-        else:
+        if any(word in text for word in ignore_keywords):
             continue
-        break
 
-    return [
-        {
-            "source": source["name"],
-            "title": best_title,
-            "link": source["url"]
-        }
-    ]
+        if any(word in text for word in main_doc_keywords):
 
+            results.append({
+                "source": source["name"],
+                "title": title if title else "Documento di gara",
+                "link": source["url"]  # pagina archivio
+            })
+
+    return results
 
 # -----------------------------
 # PARSER HTML LIST
