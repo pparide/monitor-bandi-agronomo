@@ -4,36 +4,12 @@
     "url": "https://piattaforma.asmecomm.it/gare/"
   },
   {
-    "name": "Traspare – piattaforma gare enti locali",
-    "url": "https://traspare.com/announcements"
-  },
-  {
-    "name": "Tuttogare – piattaforma gare",
-    "url": "https://appalti.tuttogare.it/gare"
-  },
-  {
-    "name": "Maggioli – portale gare enti locali",
-    "url": "https://appalti.maggiolicloud.it/PortaleAppalti/it/ppgare_bandi_lista.wp"
-  },
-  {
     "name": "Provincia di Salerno – Traspare",
     "url": "https://provinciasalerno.traspare.com/announcements"
   },
   {
     "name": "Comune di Salerno – portale appalti",
     "url": "https://albofornitori.comune.salerno.it/PortaleAppalti/it/ppgare_bandi_lista.wp"
-  },
-  {
-    "name": "Comune di Cava de' Tirreni – portale gare",
-    "url": "https://cittadicava.traspare.com/announcements"
-  },
-  {
-    "name": "Comune di Battipaglia – gare",
-    "url": "https://battipaglia.traspare.com/announcements"
-  },
-  {
-    "name": "Comune di Eboli – gare",
-    "url": "https://comunedi.eboli.sa.it/amministrazione-trasparente/bandi-di-gara-e-contratti/"
   },
   {
     "name": "Comune di Baronissi – gare",
@@ -44,26 +20,6 @@
     "url": "https://www.comune.pellezzano.sa.it/it/page/bandi-gare-e-manifestazioni-di-interesse-21-02-2022-2023"
   },
   {
-    "name": "Comune di Sapri – gare",
-    "url": "https://sapri.traspare.com/announcements"
-  },
-  {
-    "name": "Comune di Vallo della Lucania – gare",
-    "url": "https://vallodellalucania.traspare.com/announcements"
-  },
-  {
-    "name": "Comune di Agropoli – gare",
-    "url": "https://agropoli.traspare.com/announcements"
-  },
-  {
-    "name": "Parco Nazionale del Cilento – bandi",
-    "url": "https://www.cilentoediano.it/bandi-e-avvisi/"
-  },
-  {
-    "name": "Autorità di Bacino Appennino Meridionale – gare",
-    "url": "https://www.distrettoappenninomeridionale.it/amministrazione-trasparente/bandi-di-gara/"
-  },
-  {
     "name": "Regione Campania – bandi agricoltura",
     "url": "https://agricoltura.regione.campania.it/bandi.html"
   },
@@ -72,15 +28,7 @@
     "url": "https://www.regione.campania.it/regione/it/amministrazione-trasparente/bandi-di-gara-e-contratti"
   },
   {
-    "name": "Università Federico II – prestazioni occasionali",
-    "url": "https://www.unina.it/it/ateneo/concorsi-e-borse-di-studio/prestazioni-occasionali"
-  },
-  {
     "name": "Università di Salerno – collaborazioni",
     "url": "https://web.unisa.it/home/bandi/concorsi-selezioni/collaborazioni"
-  },
-  {
-    "name": "Università di Salerno – portale appalti",
-    "url": "https://unisa.ubuy.cineca.it/PortaleAppalti/it/ppgare_bandi_lista.wp"
   }
 ]
