@@ -1,49 +1,38 @@
 import json
 import os
+import io
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
-import io
 from PyPDF2 import PdfReader
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
 TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0",
-    "Accept-Language": "it-IT,it;q=0.9"
-}
+HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 
-def load_json(path, default=None):
+def load_json(path, default):
     try:
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     except:
-        return default if default else []
+        return default
 
 
 def save_json(path, data):
     with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
+        json.dump(data, f, indent=2, ensure_ascii=False)
 
 
-def send_telegram_message(text):
+def send_telegram(text):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-
-    requests.post(
-        url,
-        data={
-            "chat_id": TELEGRAM_CHAT_ID,
-            "text": text
-        },
-        timeout=20
-    )
+    requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": text})
 
 
 def get_page(url):
     try:
-        r = requests.get(url, headers=HEADERS, timeout=25)
+        r = requests.get(url, headers=HEADERS, timeout=30)
         r.raise_for_status()
         return BeautifulSoup(r.text, "html.parser")
     except:
@@ -63,9 +52,7 @@ def extract_links(base_url, soup):
             continue
 
         full = urljoin(base_url, href)
-
-        if not full.startswith("http"):
-            continue
+        full = full.split("#")[0]
 
         links.append({
             "url": full,
@@ -75,17 +62,36 @@ def extract_links(base_url, soup):
     return links
 
 
+def looks_like_bando(url, title):
+
+    text = (url + " " + title).lower()
+
+    keywords = [
+        "bando",
+        "gara",
+        "avviso",
+        "manifestazione",
+        "affidamento",
+        "incarico",
+        "disciplinare",
+        "capitolato",
+        "appalto",
+        ".pdf"
+    ]
+
+    return any(k in text for k in keywords)
+
+
 def read_pdf(url):
 
     try:
 
         r = requests.get(url, headers=HEADERS, timeout=30)
-
-        pdf = PdfReader(io.BytesIO(r.content))
+        reader = PdfReader(io.BytesIO(r.content))
 
         text = ""
 
-        for page in pdf.pages[:5]:
+        for page in reader.pages[:6]:
             try:
                 text += page.extract_text() or ""
             except:
@@ -100,13 +106,9 @@ def read_pdf(url):
 def read_html(url):
 
     try:
-
-        r = requests.get(url, headers=HEADERS, timeout=25)
-
+        r = requests.get(url, headers=HEADERS, timeout=30)
         soup = BeautifulSoup(r.text, "html.parser")
-
         return soup.get_text(" ", strip=True).lower()
-
     except:
         return ""
 
@@ -136,13 +138,14 @@ def score_text(text, rules):
 
 def main():
 
-    sources = load_json("sources.json")
-    rules = load_json("rules.json")
+    sources = load_json("sources.json", [])
+    rules = load_json("rules.json", {})
     seen = load_json("seen.json", [])
 
     found = []
+    new_seen = list(seen)
+
     debug = []
-    updated_seen = list(seen)
 
     for source in sources:
 
@@ -157,23 +160,28 @@ def main():
 
         links = extract_links(url, soup)
 
-        links = links[:30]  # limita archivio
+        candidates = []
+
+        for link in links:
+
+            if looks_like_bando(link["url"], link["title"]):
+                candidates.append(link)
 
         matches = 0
 
-        for item in links:
+        for link in candidates:
 
-            link = item["url"]
-            title = item["title"]
+            url = link["url"]
+            title = link["title"]
 
-            if link in seen:
+            if url in seen:
                 continue
 
-            content = read_content(link)
+            content = read_content(url)
 
-            combined = f"{title} {link} {content}".lower()
+            text = (title + " " + url + " " + content).lower()
 
-            score = score_text(combined, rules)
+            score = score_text(text, rules)
 
             if score < rules["threshold"]:
                 continue
@@ -183,27 +191,31 @@ def main():
                 f"Fonte: {name}\n"
                 f"Titolo: {title}\n"
                 f"Score: {score}\n"
-                f"Link: {link}"
+                f"Link: {url}"
             )
 
-            updated_seen.append(link)
+            new_seen.append(url)
+
             matches += 1
 
         debug.append(
-            f"{name}: link analizzati={len(links)} match={matches}"
+            f"{name}: link totali={len(links)} candidati={len(candidates)} match={matches}"
         )
 
     if found:
 
         message = "\n\n".join(found[:10])
 
-        send_telegram_message(message)
+        if len(found) > 10:
+            message += f"\n\nAltri {len(found)-10} risultati."
 
-        save_json("seen.json", updated_seen)
+        send_telegram(message)
+
+        save_json("seen.json", new_seen)
 
     else:
 
-        send_telegram_message(
+        send_telegram(
             "Nessun nuovo bando trovato\n\nDEBUG\n\n" + "\n".join(debug)
         )
 
