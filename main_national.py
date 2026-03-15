@@ -2,6 +2,7 @@ import json
 import os
 import requests
 from bs4 import BeautifulSoup
+from urllib.parse import urljoin
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
 TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
@@ -12,7 +13,7 @@ def load_json(path, default=None):
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     except Exception:
-        return default if default is not None else {}
+        return default if default is not None else []
 
 
 def save_json(path, data):
@@ -29,61 +30,99 @@ def send_telegram_message(text):
     requests.post(url, data=data, timeout=20)
 
 
-def page_text(url):
+def get_page(url):
     try:
-        response = requests.get(url, timeout=20)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.text, "html.parser")
-        return soup.get_text(" ", strip=True).lower()
-    except Exception as e:
-        return f"errore lettura pagina: {e}"
+        r = requests.get(url, timeout=20)
+        r.raise_for_status()
+        return BeautifulSoup(r.text, "html.parser")
+    except Exception:
+        return None
+
+
+def extract_links(base_url, soup):
+    links = []
+    for a in soup.find_all("a", href=True):
+        href = a["href"]
+        full = urljoin(base_url, href)
+        links.append(full)
+    return links
+
+
+def is_candidate_link(link):
+    keywords = [
+        "bando",
+        "gara",
+        "avviso",
+        "procedura",
+        "manifestazione",
+        "incarico",
+        "affidamento"
+    ]
+    l = link.lower()
+    return any(k in l for k in keywords)
+
+
+def page_text(url):
+    soup = get_page(url)
+    if not soup:
+        return ""
+    return soup.get_text(" ", strip=True).lower()
 
 
 def main():
+
     sources = load_json("sources_national.json", [])
     keywords = load_json("keywords_national.json", {"include": [], "exclude": []})
     seen = load_json("seen_national.json", [])
 
-    include = [k.lower() for k in keywords.get("include", [])]
-    exclude = [k.lower() for k in keywords.get("exclude", [])]
+    include = [k.lower() for k in keywords["include"]]
+    exclude = [k.lower() for k in keywords["exclude"]]
 
     found = []
     updated_seen = list(seen)
 
     for source in sources:
-        source_name = source.get("name", "Fonte senza nome")
-        source_url = source.get("url", "")
 
-        if not source_url:
+        source_name = source["name"]
+        source_url = source["url"]
+
+        soup = get_page(source_url)
+
+        if not soup:
             continue
 
-        if source_url in seen:
-            continue
+        links = extract_links(source_url, soup)
 
-        text = page_text(source_url)
+        for link in links:
 
-        if text.startswith("errore lettura pagina"):
-            continue
+            if not is_candidate_link(link):
+                continue
 
-        include_matches = [word for word in include if word in text]
-        exclude_matches = [word for word in exclude if word in text]
+            if link in seen:
+                continue
 
-        if not include_matches:
-            continue
+            text = page_text(link)
 
-        if exclude_matches:
-            continue
+            include_matches = [w for w in include if w in text]
+            exclude_matches = [w for w in exclude if w in text]
 
-        found.append(
-            f"- {source_name}\n"
-            f"  parole trovate: {', '.join(include_matches[:5])}\n"
-            f"  link: {source_url}"
-        )
+            if not include_matches:
+                continue
 
-        updated_seen.append(source_url)
+            if exclude_matches:
+                continue
+
+            found.append(
+                f"Nuovo bando nazionale individuato\n\n"
+                f"Fonte: {source_name}\n"
+                f"Parole trovate: {', '.join(include_matches[:5])}\n"
+                f"Link: {link}"
+            )
+
+            updated_seen.append(link)
 
     if found:
-        message = "Nuove fonti nazionali potenzialmente interessanti trovate:\n\n" + "\n\n".join(found)
+        message = "\n\n".join(found)
         send_telegram_message(message)
         save_json("seen_national.json", updated_seen)
 
