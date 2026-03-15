@@ -372,22 +372,56 @@ def parse_portale_appalti(source):
         return []
 
     results = []
+    seen_links = set()
 
     for a in soup.find_all("a", href=True):
-        href = a["href"]
-        title = a.get_text(strip=True)
+        href = a["href"].strip()
+        title = a.get_text(" ", strip=True)
 
-        text = (title + " " + href).lower()
-
-        if "bando" not in text and "gara" not in text and "avviso" not in text:
+        if not href:
             continue
 
         link = urljoin(source["url"], href)
+        text = f"{title} {href}".lower()
+
+        # prendiamo solo link chiaramente legati a bandi/avvisi
+        if not any(k in text for k in [
+            "bando",
+            "gara",
+            "avviso",
+            "procedura",
+            "manifestazione",
+            "affidamento"
+        ]):
+            continue
+
+        # scarta roba generica o tecnica di navigazione
+        if any(k in text for k in [
+            "home",
+            "pagina iniziale",
+            "accedi",
+            "login",
+            "profilo",
+            "contatti",
+            "faq",
+            "help",
+            "manuale"
+        ]):
+            continue
+
+        if link in seen_links:
+            continue
+
+        seen_links.add(link)
+
+        # se il titolo è debole, prova a leggere la pagina
+        if not title or len(title) < 8:
+            title = get_text_from_page(link)
 
         results.append(
             {
                 "source": source["name"],
-                "title": title,
+                "title": title if title else "Procedura di gara",
                 "link": link,
             }
         )
