@@ -7,7 +7,12 @@
   {
     "name": "Provincia di Salerno",
     "url": "https://provinciasalerno.traspare.com/announcements",
-    "type": "traspare_announcements"
+    "type": "traspare"
+  },
+  {
+    "name": "Comune di Baronissi",
+    "url": "https://baronissi.traspare.com/announcements",
+    "type": "traspare"
   },
   {
     "name": "Comune di Pellezzano",
@@ -15,8 +20,18 @@
     "type": "pdf_archive"
   },
   {
+    "name": "Regione Campania Agricoltura",
+    "url": "https://agricoltura.regione.campania.it/bandi.html",
+    "type": "html_list"
+  },
+  {
     "name": "Università di Salerno",
     "url": "https://web.unisa.it/home/bandi/concorsi-selezioni/collaborazioni",
-    "type": "university_list"
+    "type": "university"
+  },
+  {
+    "name": "ASMECOMM",
+    "url": "https://piattaforma.asmecomm.it/gare/",
+    "type": "html_list"
   }
 ]
