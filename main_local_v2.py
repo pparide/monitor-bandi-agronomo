@@ -37,8 +37,7 @@ def send_email(subject, body):
 
     msg.attach(MIMEText(body, "plain", "utf-8"))
 
-    with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT) as server:
-        server.starttls()
+    with smtplib.SMTP_SSL(EMAIL_HOST, EMAIL_PORT) as server:
         server.login(EMAIL_USER, EMAIL_PASSWORD)
         server.sendmail(EMAIL_USER, EMAIL_TO, msg.as_string())
 
@@ -52,13 +51,82 @@ def get_page(url):
         return None
 
 
+def is_relevant(title):
+    text = title.lower()
+
+    strong_keywords = [
+        "agronom",
+        "forest",
+        "verde",
+        "alber",
+        "vta",
+        "paesagg",
+        "giardin",
+        "parchi",
+        "agricolt",
+        "ambient",
+        "territorio",
+        "biodivers",
+        "rinatural",
+        "idraulico forest",
+        "sistemazione idraulico",
+        "ingegneria naturalistica",
+        "landscape"
+    ]
+
+    technical_keywords = [
+        "progettazione",
+        "servizi di ingegneria",
+        "direzione lavori",
+        "piano",
+        "manutenzione",
+        "accordo quadro",
+        "appalto",
+        "servizi tecnici"
+    ]
+
+    territory_keywords = [
+        "verde",
+        "ambient",
+        "territorio",
+        "forest",
+        "paesagg",
+        "agricolt"
+    ]
+
+    excluded_keywords = [
+        "servizio civile",
+        "censimento",
+        "elettorale",
+        "bonus",
+        "asilo",
+        "infanzia",
+        "riscossione",
+        "tribut",
+        "protes",
+        "acciaio",
+        "fem",
+        "strength"
+    ]
+
+    if any(k in text for k in excluded_keywords):
+        return False
+
+    if any(k in text for k in strong_keywords):
+        return True
+
+    if any(k in text for k in technical_keywords) and any(k in text for k in territory_keywords):
+        return True
+
+    return False
+
+
 # -----------------------------
 # PARSER PDF ARCHIVE
 # -----------------------------
 
 
 def parse_pdf_archive(source):
-
     soup = get_page(source["url"])
 
     if not soup:
@@ -94,27 +162,28 @@ def parse_pdf_archive(source):
     results = []
 
     for a in soup.find_all("a", href=True):
-
         href = a["href"]
         title = a.get_text(strip=True)
 
         if ".pdf" not in href.lower():
             continue
 
+        pdf_link = urljoin(source["url"], href)
         text = f"{title} {href}".lower()
 
         if any(word in text for word in ignore_keywords):
             continue
 
         if any(word in text for word in main_doc_keywords):
-
             results.append({
                 "source": source["name"],
                 "title": title if title else "Documento di gara",
-                "link": source["url"]  # pagina archivio
+                "link": source["url"],   # pagina da mostrare in email
+                "seen_key": pdf_link     # chiave interna per deduplica
             })
 
     return results
+
 
 # -----------------------------
 # PARSER HTML LIST
@@ -133,7 +202,22 @@ def parse_html_list(source):
         href = a["href"]
         title = a.get_text(strip=True)
 
-        text = (title + href).lower()
+        text = (title + " " + href).lower()
+
+        generic_bad_titles = [
+            "vai alla pagina",
+            "home",
+            "pagina iniziale",
+            "clicca qui",
+            "maggiori informazioni",
+            "leggi tutto",
+            "scarica",
+            "download",
+            "procedure di gara"
+        ]
+
+        if title.strip().lower() in generic_bad_titles:
+            continue
 
         keywords = [
             "bando",
@@ -148,6 +232,13 @@ def parse_html_list(source):
             continue
 
         link = urljoin(source["url"], href)
+
+        # Per UNISA preferiamo la pagina HTML del bando, non il PDF allegato
+        if "unisa.it" in source["url"]:
+            if link.lower().endswith(".pdf"):
+                continue
+            if "bando=" not in link and "anno=" not in link:
+                continue
 
         results.append(
             {
@@ -177,17 +268,26 @@ def parse_traspare(source):
         href = a["href"]
         title = a.get_text(strip=True)
 
-        h = href.lower()
+        link = urljoin(source["url"], href)
+        l = link.lower()
 
-        if "announcement" not in h and "gara" not in h and "announcements" not in h:
+        if "announcements/" not in l:
             continue
 
-        link = urljoin(source["url"], href)
+        if any(x in l for x in [
+            "facebook.com",
+            "linkedin.com",
+            "api.whatsapp.com",
+            "t.me/",
+            "x.com/",
+            "mailto:"
+        ]):
+            continue
 
         results.append(
             {
                 "source": source["name"],
-                "title": title,
+                "title": title if title else "Bando Traspare",
                 "link": link,
             }
         )
@@ -212,7 +312,7 @@ def parse_portale_appalti(source):
         href = a["href"]
         title = a.get_text(strip=True)
 
-        text = (title + href).lower()
+        text = (title + " " + href).lower()
 
         if "bando" not in text and "gara" not in text and "avviso" not in text:
             continue
@@ -266,20 +366,23 @@ def main():
             all_results.extend(results)
 
         new_items = []
-        seen_links_run = set()
+        seen_keys_run = set()
 
         for item in all_results:
-            link = item["link"]
-
-            if link in seen_links_run:
+            if not is_relevant(item["title"]):
                 continue
 
-            if link in seen:
+            key = item.get("seen_key", item["link"])
+
+            if key in seen_keys_run:
+                continue
+
+            if key in seen:
                 continue
 
             new_items.append(item)
-            seen.append(link)
-            seen_links_run.add(link)
+            seen.append(key)
+            seen_keys_run.add(key)
 
         debug.append(f"nuovi risultati dopo deduplica: {len(new_items)}")
 
