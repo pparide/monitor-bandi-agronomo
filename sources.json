@@ -1,34 +1,22 @@
 [
   {
-    "name": "ASMECOMM – gare",
-    "url": "https://piattaforma.asmecomm.it/gare/"
+    "name": "Comune di Salerno",
+    "url": "https://albofornitori.comune.salerno.it/PortaleAppalti/it/ppgare_bandi_lista.wp",
+    "type": "portale_appalti"
   },
   {
-    "name": "Provincia di Salerno – Traspare",
-    "url": "https://provinciasalerno.traspare.com/announcements"
+    "name": "Provincia di Salerno",
+    "url": "https://provinciasalerno.traspare.com/announcements",
+    "type": "traspare_announcements"
   },
   {
-    "name": "Comune di Salerno – portale appalti",
-    "url": "https://albofornitori.comune.salerno.it/PortaleAppalti/it/ppgare_bandi_lista.wp"
+    "name": "Comune di Pellezzano",
+    "url": "https://www.comune.pellezzano.sa.it/it/page/bandi-gare-e-manifestazioni-di-interesse-21-02-2022-2023",
+    "type": "pdf_archive"
   },
   {
-    "name": "Comune di Baronissi – gare",
-    "url": "https://baronissi.traspare.com/announcements"
-  },
-  {
-    "name": "Comune di Pellezzano – bandi",
-    "url": "https://www.comune.pellezzano.sa.it/it/page/bandi-gare-e-manifestazioni-di-interesse-21-02-2022-2023"
-  },
-  {
-    "name": "Regione Campania – bandi agricoltura",
-    "url": "https://agricoltura.regione.campania.it/bandi.html"
-  },
-  {
-    "name": "Regione Campania – gare e contratti",
-    "url": "https://www.regione.campania.it/regione/it/amministrazione-trasparente/bandi-di-gara-e-contratti"
-  },
-  {
-    "name": "Università di Salerno – collaborazioni",
-    "url": "https://web.unisa.it/home/bandi/concorsi-selezioni/collaborazioni"
+    "name": "Università di Salerno",
+    "url": "https://web.unisa.it/home/bandi/concorsi-selezioni/collaborazioni",
+    "type": "university_list"
   }
 ]
