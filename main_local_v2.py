@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
@@ -49,6 +50,21 @@ def get_page(url):
         return BeautifulSoup(r.text, "html.parser")
     except Exception:
         return None
+
+
+def get_text_from_page(url):
+    soup = get_page(url)
+    if not soup:
+        return ""
+
+    for tag in ["h1", "h2", "title"]:
+        el = soup.find(tag)
+        if el:
+            text = el.get_text(" ", strip=True)
+            if text:
+                return text
+
+    return soup.get_text(" ", strip=True)[:300]
 
 
 def is_relevant(title):
@@ -175,12 +191,14 @@ def parse_pdf_archive(source):
             continue
 
         if any(word in text for word in main_doc_keywords):
-            results.append({
-                "source": source["name"],
-                "title": title if title else "Documento di gara",
-                "link": source["url"],   # pagina da mostrare in email
-                "seen_key": pdf_link     # chiave interna per deduplica
-            })
+            results.append(
+                {
+                    "source": source["name"],
+                    "title": title if title else "Documento di gara",
+                    "link": source["url"],   # pagina da mostrare
+                    "seen_key": pdf_link     # chiave per deduplica
+                }
+            )
 
     return results
 
@@ -198,23 +216,23 @@ def parse_html_list(source):
 
     results = []
 
+    generic_bad_titles = [
+        "vai alla pagina",
+        "home",
+        "pagina iniziale",
+        "clicca qui",
+        "maggiori informazioni",
+        "leggi tutto",
+        "scarica",
+        "download",
+        "procedure di gara"
+    ]
+
     for a in soup.find_all("a", href=True):
         href = a["href"]
         title = a.get_text(strip=True)
 
         text = (title + " " + href).lower()
-
-        generic_bad_titles = [
-            "vai alla pagina",
-            "home",
-            "pagina iniziale",
-            "clicca qui",
-            "maggiori informazioni",
-            "leggi tutto",
-            "scarica",
-            "download",
-            "procedure di gara"
-        ]
 
         if title.strip().lower() in generic_bad_titles:
             continue
@@ -233,7 +251,7 @@ def parse_html_list(source):
 
         link = urljoin(source["url"], href)
 
-        # Per UNISA preferiamo la pagina HTML del bando, non il PDF allegato
+        # Per UNISA teniamo solo la pagina HTML del bando, non il PDF
         if "unisa.it" in source["url"]:
             if link.lower().endswith(".pdf"):
                 continue
@@ -257,51 +275,44 @@ def parse_html_list(source):
 
 
 def parse_traspare(source):
-
     soup = get_page(source["url"])
 
     if not soup:
         return []
 
     results = []
+    seen_links = set()
 
     for a in soup.find_all("a", href=True):
-
-        href = a["href"]
-        title = a.get_text(strip=True)
+        href = a["href"].strip()
+        if not href:
+            continue
 
         link = urljoin(source["url"], href)
         l = link.lower()
 
-        # vogliamo solo le vere schede gara
-        if "/announcements/" not in l:
+        # Solo schede gara vere
+        if not re.search(r"/announcements/\d+/?$", l):
             continue
 
-        # deve avere un numero finale (la gara)
-        parts = l.rstrip("/").split("/")
-        if not parts[-1].isdigit():
+        if link in seen_links:
             continue
 
-        # elimina social o condivisioni
-        if any(x in l for x in [
-            "facebook",
-            "linkedin",
-            "whatsapp",
-            "telegram",
-            "mailto",
-            "twitter",
-            "x.com"
-        ]):
-            continue
+        seen_links.add(link)
 
-        if len(title) < 10:
-            title = "Procedura di gara"
+        title = a.get_text(" ", strip=True)
 
-        results.append({
-            "source": source["name"],
-            "title": title,
-            "link": link
-        })
+        # Se il titolo del link è vuoto o povero, leggiamo la scheda
+        if not title or len(title) < 8:
+            title = get_text_from_page(link)
+
+        results.append(
+            {
+                "source": source["name"],
+                "title": title if title else "Procedura di gara",
+                "link": link,
+            }
+        )
 
     return results
 
