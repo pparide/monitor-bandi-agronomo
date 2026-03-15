@@ -1,9 +1,9 @@
 [
   {
-    "name": "Comune di Pellezzano",
-    "url": "https://www.comune.pellezzano.sa.it/it/page/bandi-gare-e-manifestazioni-di-interesse-21-02-2022-2023",
-    "type": "pdf_archive"
-  },
+  "name": "Comune di Pellezzano",
+  "url": "https://www.comune.pellezzano.sa.it/it/news?type=3",
+  "type": "html_list"
+},
   {
     "name": "Comune di Salerno",
     "url": "https://albofornitori.comune.salerno.it/PortaleAppalti/it/ppgare_bandi_lista.wp",
