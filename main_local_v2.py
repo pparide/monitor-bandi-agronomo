@@ -1,10 +1,10 @@
 import json
 import os
 import re
-from datetime import datetime, timedelta
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+from datetime import datetime, timedelta
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -31,12 +31,19 @@ def save_json(path, data):
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 
+def load_health():
+    return load_json("source_health.json", {})
+
+
+def save_health(data):
+    save_json("source_health.json", data)
+
+
 def send_email(subject, body):
     msg = MIMEMultipart()
     msg["From"] = EMAIL_USER
     msg["To"] = EMAIL_TO
     msg["Subject"] = subject
-
     msg.attach(MIMEText(body, "plain", "utf-8"))
 
     with smtplib.SMTP_SSL(EMAIL_HOST, EMAIL_PORT) as server:
@@ -47,9 +54,18 @@ def send_email(subject, body):
 def get_page(url):
     try:
         r = requests.get(url, headers=HEADERS, timeout=30)
-        r.raise_for_status()
+
+        if r.status_code != 200:
+            print(f"ERRORE HTTP {r.status_code} su {url}")
+            return None
+
+        if len(r.text) < 500:
+            print(f"Pagina sospetta (troppo corta): {url}")
+            return None
+
         return BeautifulSoup(r.text, "html.parser")
-    except Exception:
+    except Exception as e:
+        print(f"Errore richiesta {url}: {e}")
         return None
 
 
@@ -65,7 +81,8 @@ def get_text_from_page(url):
             if text:
                 return text
 
-    return soup.get_text(" ", strip=True)[:300]
+    return soup.get_text(" ", strip=True)[:500]
+
 
 def is_recent(text, days=120):
     today = datetime.today()
@@ -78,11 +95,12 @@ def is_recent(text, days=120):
             d = datetime.strptime(match, "%d/%m/%Y")
             if d >= limit:
                 return True
-        except:
+        except Exception:
             pass
 
     return False
-    
+
+
 def is_relevant(title):
     text = title.lower()
 
@@ -271,7 +289,8 @@ def parse_html_list(source):
 
         link = urljoin(source["url"], href)
 
-        # Per UNISA teniamo solo la pagina HTML del bando, non il PDF
+        # Pellezzano news/avvisi e simili: teniamo la pagina dell'avviso
+        # UNISA: teniamo solo la pagina HTML del bando, non il PDF
         if "unisa.it" in source["url"]:
             if link.lower().endswith(".pdf"):
                 continue
@@ -311,7 +330,7 @@ def parse_traspare(source):
         link = urljoin(source["url"], href)
         l = link.lower()
 
-        # Solo schede gara vere
+        # solo schede gara vere
         if not re.search(r"/announcements/\d+/?$", l):
             continue
 
@@ -321,14 +340,12 @@ def parse_traspare(source):
         seen_links.add(link)
 
         title = a.get_text(" ", strip=True)
-
         page_text = get_text_from_page(link)
 
-        # Se il titolo del link è vuoto o povero, leggiamo la scheda
         if not title or len(title) < 8:
             title = page_text
 
-        # Teniamo solo gare recenti
+        # solo gare recenti
         if not is_recent(page_text):
             continue
 
@@ -412,23 +429,28 @@ def main():
                 results = []
 
             debug.append(f"{source_name}: risultati parser={len(results)}")
+
+            previous_zero_runs = health.get(source_name, {}).get("zero_runs", 0)
+
+            if len(results) == 0:
+                zero_runs = previous_zero_runs + 1
+            else:
+                zero_runs = 0
+
+            health[source_name] = {
+                "last_results": len(results),
+                "zero_runs": zero_runs
+            }
+
+            if zero_runs >= 3:
+                debug.append(
+                    f"⚠️ POSSIBILE PROBLEMA STRUTTURA O URL: {source_name} ha 0 risultati da {zero_runs} run consecutivi"
+                )
+
             all_results.extend(results)
 
         debug.append(f"totale risultati grezzi: {len(all_results)}")
-        previous_zero_runs = health.get(source_name, {}).get("zero_runs", 0)
 
-if len(results) == 0:
-    zero_runs = previous_zero_runs + 1
-else:
-    zero_runs = 0
-
-health[source_name] = {
-    "last_results": len(results),
-    "zero_runs": zero_runs
-}
-
-if zero_runs >= 3:
-    debug.append(f"⚠️ POSSIBILE PROBLEMA STRUTTURA O URL: {source_name} ha 0 risultati da {zero_runs} run consecutivi")
         new_items = []
         seen_keys_run = set()
 
@@ -451,17 +473,24 @@ if zero_runs >= 3:
         debug.append(f"nuovi risultati dopo deduplica: {len(new_items)}")
 
         save_json("seen.json", seen)
-        def load_health():
-        return load_json("source_health.json", {})
-
-
-def save_health(data):
-    save_json("source_health.json", data)
         debug.append("seen.json salvato")
+
+        save_health(health)
+        debug.append("source_health.json salvato")
+
+        warnings = [d for d in debug if "⚠️" in d]
 
         if not new_items:
             subject = "Monitor bandi – nessun nuovo bando"
-            body = "Nessun nuovo bando trovato.\n\nDEBUG\n\n" + "\n".join(debug)
+            body = "Nessun nuovo bando trovato.\n\n"
+
+            if warnings:
+                body += "ATTENZIONE POSSIBILI PROBLEMI FONTI\n\n"
+                for w in warnings:
+                    body += w + "\n"
+                body += "\n"
+
+            body += "DEBUG\n\n" + "\n".join(debug)
             send_email(subject, body)
             return
 
@@ -475,6 +504,12 @@ def save_health(data):
                 f"{item['title']}\n"
                 f"{item['link']}\n\n"
             )
+
+        if warnings:
+            body += "ATTENZIONE POSSIBILI PROBLEMI FONTI\n\n"
+            for w in warnings:
+                body += w + "\n"
+            body += "\n"
 
         body += "DEBUG\n" + "\n".join(debug)
 
