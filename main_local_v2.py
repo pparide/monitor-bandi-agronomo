@@ -257,6 +257,7 @@ def parse_html_list(source):
 
 
 def parse_traspare(source):
+
     soup = get_page(source["url"])
 
     if not soup:
@@ -265,32 +266,42 @@ def parse_traspare(source):
     results = []
 
     for a in soup.find_all("a", href=True):
+
         href = a["href"]
         title = a.get_text(strip=True)
 
         link = urljoin(source["url"], href)
         l = link.lower()
 
-        if "announcements/" not in l:
+        # vogliamo solo le vere schede gara
+        if "/announcements/" not in l:
             continue
 
+        # deve avere un numero finale (la gara)
+        parts = l.rstrip("/").split("/")
+        if not parts[-1].isdigit():
+            continue
+
+        # elimina social o condivisioni
         if any(x in l for x in [
-            "facebook.com",
-            "linkedin.com",
-            "api.whatsapp.com",
-            "t.me/",
-            "x.com/",
-            "mailto:"
+            "facebook",
+            "linkedin",
+            "whatsapp",
+            "telegram",
+            "mailto",
+            "twitter",
+            "x.com"
         ]):
             continue
 
-        results.append(
-            {
-                "source": source["name"],
-                "title": title if title else "Bando Traspare",
-                "link": link,
-            }
-        )
+        if len(title) < 10:
+            title = "Procedura di gara"
+
+        results.append({
+            "source": source["name"],
+            "title": title,
+            "link": link
+        })
 
     return results
 
