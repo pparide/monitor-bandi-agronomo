@@ -1,1 +1,58 @@
-{}
+{
+  "Comune di Pellezzano": {
+    "last_results": 4,
+    "zero_runs": 0
+  },
+  "Comune di Salerno": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Provincia di Salerno": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Baronissi": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Cava de' Tirreni": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Battipaglia": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Eboli": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Agropoli": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Sapri": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Parco Nazionale del Cilento": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Regione Campania Agricoltura": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Regione Campania Gare": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Università di Salerno Collaborazioni": {
+    "last_results": 11,
+    "zero_runs": 0
+  },
+  "ASMECOMM Gare": {
+    "last_results": 0,
+    "zero_runs": 1
+  }
+}
