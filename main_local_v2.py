@@ -51,9 +51,7 @@ def parse_pdf_archive(source):
     if not soup:
         return []
 
-    results = []
-
-    # parole che indicano documenti principali
+    # Documenti che ci fanno capire che la pagina contiene davvero una gara
     good_words = [
         "bando",
         "avviso",
@@ -67,20 +65,7 @@ def parse_pdf_archive(source):
         "determina"
     ]
 
-    # parole che indicano allegati tecnici
-    bad_words = [
-        "tavola",
-        "tv_",
-        "relazione",
-        "cronoprogramma",
-        "computo",
-        "elenco prezzi",
-        "psc",
-        "fascicolo",
-        "manutenzione",
-        "piano",
-        "grafico"
-    ]
+    found_titles = []
 
     for a in soup.find_all("a", href=True):
 
@@ -92,25 +77,43 @@ def parse_pdf_archive(source):
 
         text = (title + " " + href).lower()
 
-        # scarta allegati tecnici
-        if any(b in text for b in bad_words):
+        if any(word in text for word in good_words):
+            found_titles.append(title if title else "Documento di gara")
+
+    # Se non troviamo documenti principali, non segnaliamo nulla
+    if not found_titles:
+        return []
+
+    # Scegliamo il titolo migliore da mostrare
+    priority_order = [
+        "bando",
+        "avviso",
+        "disciplinare",
+        "manifestazione",
+        "affidamento",
+        "incarico",
+        "capitolato",
+        "determina"
+    ]
+
+    best_title = found_titles[0]
+
+    for keyword in priority_order:
+        for title in found_titles:
+            if keyword in title.lower():
+                best_title = title
+                break
+        else:
             continue
+        break
 
-        # accetta solo documenti principali
-        if not any(g in text for g in good_words):
-            continue
-
-        link = urljoin(source["url"], href)
-
-        results.append(
-            {
-                "source": source["name"],
-                "title": title if title else "Documento gara",
-                "link": link,
-            }
-        )
-
-    return results
+    return [
+        {
+            "source": source["name"],
+            "title": best_title,
+            "link": source["url"]
+        }
+    ]
 
 
 # -----------------------------
