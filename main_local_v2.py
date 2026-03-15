@@ -271,13 +271,24 @@ def main():
 
     new_items = []
 
-    for item in all_results:
+   seen_links_run = set()
 
-        if item["link"] in seen:
-            continue
+for item in all_results:
 
-        new_items.append(item)
-        seen.append(item["link"])
+    link = item["link"]
+
+    # evita duplicati nello stesso run
+    if link in seen_links_run:
+        continue
+
+    # evita duplicati tra run diversi
+    if link in seen:
+        continue
+
+    new_items.append(item)
+
+    seen.append(link)
+    seen_links_run.add(link)
 
     save_json("seen.json", seen)
 
