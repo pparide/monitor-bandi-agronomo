@@ -53,6 +53,35 @@ def parse_pdf_archive(source):
 
     results = []
 
+    # parole che indicano documenti principali
+    good_words = [
+        "bando",
+        "avviso",
+        "disciplinare",
+        "manifestazione",
+        "incarico",
+        "affidamento",
+        "capitolato",
+        "lettera",
+        "invito",
+        "determina"
+    ]
+
+    # parole che indicano allegati tecnici
+    bad_words = [
+        "tavola",
+        "tv_",
+        "relazione",
+        "cronoprogramma",
+        "computo",
+        "elenco prezzi",
+        "psc",
+        "fascicolo",
+        "manutenzione",
+        "piano",
+        "grafico"
+    ]
+
     for a in soup.find_all("a", href=True):
 
         href = a["href"]
@@ -61,12 +90,22 @@ def parse_pdf_archive(source):
         if ".pdf" not in href.lower():
             continue
 
+        text = (title + " " + href).lower()
+
+        # scarta allegati tecnici
+        if any(b in text for b in bad_words):
+            continue
+
+        # accetta solo documenti principali
+        if not any(g in text for g in good_words):
+            continue
+
         link = urljoin(source["url"], href)
 
         results.append(
             {
                 "source": source["name"],
-                "title": title if title else "Documento PDF",
+                "title": title if title else "Documento gara",
                 "link": link,
             }
         )
