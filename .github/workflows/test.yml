@@ -33,16 +33,8 @@ jobs:
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
         run: python main_local_v2.py
 
-      - name: Commit updated seen.json
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          git add seen.json
-          git diff --cached --quiet || git commit -m "Update seen items"
-          git push
-          
       - name: Commit updated monitor state
-      run: |
+        run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add seen.json source_health.json
