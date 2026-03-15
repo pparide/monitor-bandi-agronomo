@@ -1,31 +1,32 @@
 {
   "include": [
-    "agronom",
-    "forest",
+    "agronomo",
+    "dottore agronomo",
+    "forestale",
+    "dottore forestale",
     "verde urbano",
     "piano del verde",
     "censimento alberature",
     "valutazione stabilità alberi",
     "vta",
-    "pianificazione forestale",
+    "gestione alberature",
+    "patrimonio arboreo",
+    "arboricoltura urbana",
     "ingegneria naturalistica",
     "consulenza ambientale",
+    "studio agronomico",
     "studio ambientale",
-    "via",
-    "vas",
-    "vinca",
-    "rinaturalizzazione",
+    "pianificazione forestale",
     "sistemazione idraulico forestale",
-    "dissesto idrogeologico",
-    "pianificazione territoriale",
-    "puc",
-    "pug"
+    "rinaturalizzazione",
+    "forestazione urbana",
+    "relazione agronomica",
+    "relazione paesaggistica"
   ],
   "exclude": [
-    "assunzione",
-    "tempo indeterminato",
-    "concorso pubblico",
-    "ricercatore",
-    "docente"
+    "fornitura di arredi",
+    "servizi di pulizia",
+    "vigilanza",
+    "ristorazione"
   ]
 }
