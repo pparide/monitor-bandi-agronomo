@@ -481,17 +481,6 @@ def main():
         warnings = [d for d in debug if "⚠️" in d]
 
         if not new_items:
-            subject = "Monitor bandi – nessun nuovo bando"
-            body = "Nessun nuovo bando trovato.\n\n"
-
-            if warnings:
-                body += "ATTENZIONE POSSIBILI PROBLEMI FONTI\n\n"
-                for w in warnings:
-                    body += w + "\n"
-                body += "\n"
-
-            body += "DEBUG\n\n" + "\n".join(debug)
-            send_email(subject, body)
             return
 
         subject = f"Monitor bandi – {len(new_items)} nuovi risultati"
