@@ -3,9 +3,15 @@ import os
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
-TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
-TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
+EMAIL_HOST = os.environ["EMAIL_HOST"]
+EMAIL_PORT = int(os.environ["EMAIL_PORT"])
+EMAIL_USER = os.environ["EMAIL_USER"]
+EMAIL_PASSWORD = os.environ["EMAIL_PASSWORD"]
+EMAIL_TO = os.environ["EMAIL_TO"]
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
@@ -23,15 +29,18 @@ def save_json(path, data):
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 
-def send_telegram(text):
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    r = requests.post(
-        url,
-        data={"chat_id": TELEGRAM_CHAT_ID, "text": text},
-        timeout=20
-    )
-    print("Telegram status:", r.status_code)
-    print("Telegram response:", r.text)
+def send_email(subject, body):
+    msg = MIMEMultipart()
+    msg["From"] = EMAIL_USER
+    msg["To"] = EMAIL_TO
+    msg["Subject"] = subject
+
+    msg.attach(MIMEText(body, "plain", "utf-8"))
+
+    with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT) as server:
+        server.starttls()
+        server.login(EMAIL_USER, EMAIL_PASSWORD)
+        server.sendmail(EMAIL_USER, EMAIL_TO, msg.as_string())
 
 
 def get_page(url):
@@ -41,6 +50,11 @@ def get_page(url):
         return BeautifulSoup(r.text, "html.parser")
     except Exception:
         return None
+
+
+# -----------------------------
+# PARSER PDF ARCHIVE
+# -----------------------------
 
 
 def parse_pdf_archive(source):
@@ -110,6 +124,11 @@ def parse_pdf_archive(source):
     ]
 
 
+# -----------------------------
+# PARSER HTML LIST
+# -----------------------------
+
+
 def parse_html_list(source):
     soup = get_page(source["url"])
 
@@ -149,6 +168,11 @@ def parse_html_list(source):
     return results
 
 
+# -----------------------------
+# PARSER TRASPARE
+# -----------------------------
+
+
 def parse_traspare(source):
     soup = get_page(source["url"])
 
@@ -177,6 +201,11 @@ def parse_traspare(source):
         )
 
     return results
+
+
+# -----------------------------
+# PARSER PORTALE APPALTI
+# -----------------------------
 
 
 def parse_portale_appalti(source):
@@ -209,11 +238,15 @@ def parse_portale_appalti(source):
     return results
 
 
+# -----------------------------
+# MAIN
+# -----------------------------
+
+
 def main():
     debug = []
-    try:
-        debug.append("main avviato")
 
+    try:
         sources = load_json("sources.json", [])
         seen = load_json("seen.json", [])
 
@@ -240,8 +273,6 @@ def main():
             debug.append(f"{source_name}: risultati parser={len(results)}")
             all_results.extend(results)
 
-        debug.append(f"risultati totali raccolti: {len(all_results)}")
-
         new_items = []
         seen_links_run = set()
 
@@ -264,32 +295,31 @@ def main():
         debug.append("seen.json salvato")
 
         if not new_items:
-            send_telegram(
-                "Monitor bandi\n\nNessun nuovo bando trovato.\n\nDEBUG\n\n"
-                + "\n".join(debug)
-            )
+            subject = "Monitor bandi – nessun nuovo bando"
+            body = "Nessun nuovo bando trovato.\n\nDEBUG\n\n" + "\n".join(debug)
+            send_email(subject, body)
             return
 
-        message = "Monitor bandi – nuovi risultati\n\n"
+        subject = f"Monitor bandi – {len(new_items)} nuovi risultati"
+
+        body = "Monitor bandi – nuovi risultati\n\n"
 
         for item in new_items:
-            message += (
+            body += (
                 f"{item['source']}\n"
                 f"{item['title']}\n"
                 f"{item['link']}\n\n"
             )
 
-        message += "DEBUG\n" + "\n".join(debug)
+        body += "DEBUG\n" + "\n".join(debug)
 
-        send_telegram(message)
+        send_email(subject, body)
 
     except Exception as e:
-        debug.append(f"ERRORE: {repr(e)}")
-        try:
-            send_telegram("Monitor bandi\n\nDEBUG ERRORE\n\n" + "\n".join(debug))
-        except Exception:
-            print("Errore anche nell'invio Telegram finale")
-            print("\n".join(debug))
+        subject = "Monitor bandi – errore"
+        body = "Si è verificato un errore nel monitor.\n\n"
+        body += "DEBUG\n\n" + "\n".join(debug) + f"\n\nERRORE: {repr(e)}"
+        send_email(subject, body)
 
 
 if __name__ == "__main__":
