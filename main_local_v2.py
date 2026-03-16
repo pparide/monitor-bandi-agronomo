@@ -17,6 +17,10 @@ EMAIL_TO = os.environ["EMAIL_TO"]
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
+# fonte da ispezionare nei risultati scartati
+AUDIT_SOURCE = "Provincia di Salerno"
+AUDIT_LIMIT = 10
+
 
 def load_json(path, default):
     try:
@@ -372,6 +376,7 @@ def parse_traspare(source):
 
 def main():
     debug = []
+    audit_discarded = []
 
     try:
         manual_sources = normalize_sources(load_json("sources.json", []))
@@ -451,6 +456,18 @@ def main():
 
             if score < 8:
                 discarded_low_score += 1
+
+                if item["source"] == AUDIT_SOURCE and len(audit_discarded) < AUDIT_LIMIT:
+                    audit_discarded.append(
+                        {
+                            "title": item["title"],
+                            "link": item["link"],
+                            "score": score,
+                            "title_score": title_score,
+                            "text_score": text_score,
+                            "hits": hits,
+                        }
+                    )
                 continue
 
             key = item.get("seen_key", item["link"])
@@ -496,23 +513,34 @@ def main():
 
         if not new_items:
             subject = "Monitor bandi – debug"
-            body = "Nessun nuovo bando trovato.\n\nDEBUG\n\n" + "\n".join(debug)
-            send_email(subject, body)
-            return
+            body = "Nessun nuovo bando trovato.\n\n"
+        else:
+            subject = f"Monitor bandi – {len(new_items)} nuovi risultati"
+            body = "Monitor bandi – nuovi risultati\n\n"
 
-        subject = f"Monitor bandi – {len(new_items)} nuovi risultati"
-        body = "Monitor bandi – nuovi risultati\n\n"
+            for item in new_items:
+                body += (
+                    f"{item['source']}\n"
+                    f"{item['title']}\n"
+                    f"title_score: {item['title_score']}\n"
+                    f"text_score: {item['text_score']}\n"
+                    f"score finale: {item['score']}\n"
+                    f"match: {', '.join(item['hits'])}\n"
+                    f"{item['link']}\n\n"
+                )
 
-        for item in new_items:
-            body += (
-                f"{item['source']}\n"
-                f"{item['title']}\n"
-                f"title_score: {item['title_score']}\n"
-                f"text_score: {item['text_score']}\n"
-                f"score finale: {item['score']}\n"
-                f"match: {', '.join(item['hits'])}\n"
-                f"{item['link']}\n\n"
-            )
+        if audit_discarded:
+            body += f"\nAUDIT RISULTATI SCARTATI – {AUDIT_SOURCE}\n\n"
+
+            for item in audit_discarded:
+                body += (
+                    f"{item['title']}\n"
+                    f"title_score: {item['title_score']}\n"
+                    f"text_score: {item['text_score']}\n"
+                    f"score finale: {item['score']}\n"
+                    f"match: {', '.join(item['hits'])}\n"
+                    f"{item['link']}\n\n"
+                )
 
         body += "\nDEBUG\n\n" + "\n".join(debug)
         send_email(subject, body)
