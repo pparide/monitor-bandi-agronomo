@@ -63,7 +63,16 @@ def get_page(url):
         return None
 
 
-def get_text_from_page(url):
+def get_page_text(url):
+    soup = get_page(url)
+    if not soup:
+        return ""
+
+    text = soup.get_text(" ", strip=True)
+    return re.sub(r"\s+", " ", text)[:4000]
+
+
+def get_best_title_from_page(url):
     soup = get_page(url)
     if not soup:
         return ""
@@ -75,7 +84,7 @@ def get_text_from_page(url):
             if text:
                 return text
 
-    return soup.get_text(" ", strip=True)[:3000]
+    return ""
 
 
 def is_recent(text, days=120):
@@ -96,9 +105,7 @@ def is_recent(text, days=120):
 
 
 def relevance_score(text):
-    t = text.lower()
-    score = 0
-    hits = []
+    text = text.lower()
 
     positive = {
         "agronom": 5,
@@ -126,7 +133,7 @@ def relevance_score(text):
         "progettazione": 2,
         "direzione lavori": 2,
         "manutenzione": 1,
-        "servizi tecnici": 2
+        "servizi tecnici": 2,
     }
 
     negative = {
@@ -145,25 +152,23 @@ def relevance_score(text):
         "rifiuti": -6,
         "igiene urbana": -6,
         "beni culturali": -3,
-        "cultural heritage": -3
+        "cultural heritage": -3,
     }
 
+    score = 0
+    hits = []
+
     for k, v in positive.items():
-        if k in t:
+        if k in text:
             score += v
             hits.append(f"+{k}")
 
     for k, v in negative.items():
-        if k in t:
+        if k in text:
             score += v
-            hits.append(f"{k}")
+            hits.append(f"{v}{k}")
 
     return score, hits
-
-
-def is_relevant(text):
-    score, _ = relevance_score(text)
-    return score >= 5
 
 
 def parse_html_list(source):
@@ -183,7 +188,16 @@ def parse_html_list(source):
         "leggi tutto",
         "scarica",
         "download",
-        "procedure di gara"
+        "procedure di gara",
+    ]
+
+    keywords = [
+        "bando",
+        "gara",
+        "avviso",
+        "manifestazione",
+        "incarico",
+        "affidamento",
     ]
 
     for a in soup.find_all("a", href=True):
@@ -198,15 +212,6 @@ def parse_html_list(source):
 
         text = (title + " " + href).lower()
 
-        keywords = [
-            "bando",
-            "gara",
-            "avviso",
-            "manifestazione",
-            "incarico",
-            "affidamento"
-        ]
-
         if not any(k in text for k in keywords):
             continue
 
@@ -216,21 +221,22 @@ def parse_html_list(source):
             continue
         seen_links.add(link)
 
-        # UNISA: tieni solo la pagina html del bando
+        # UNISA: teniamo solo la pagina HTML del bando
         if "unisa.it" in source["url"]:
             if link.lower().endswith(".pdf"):
                 continue
             if "bando=" not in link and "anno=" not in link:
                 continue
 
-        page_text = get_text_from_page(link)
+        page_text = get_page_text(link)
+        best_title = title if title else get_best_title_from_page(link)
 
         results.append(
             {
                 "source": source["name"],
-                "title": title if title else "Avviso",
+                "title": best_title if best_title else "Avviso",
                 "link": link,
-                "text": page_text
+                "text": page_text,
             }
         )
 
@@ -261,7 +267,7 @@ def parse_traspare(source):
         seen_links.add(link)
 
         title = a.get_text(" ", strip=True)
-        page_text = get_text_from_page(link)
+        page_text = get_page_text(link)
 
         if not page_text:
             continue
@@ -277,7 +283,7 @@ def parse_traspare(source):
                 "source": source["name"],
                 "title": title if title else "Procedura di gara",
                 "link": link,
-                "text": page_text
+                "text": page_text,
             }
         )
 
@@ -336,6 +342,10 @@ def main():
         new_items = []
         seen_keys_run = set()
 
+        discarded_low_score = 0
+        discarded_seen = 0
+        discarded_same_run = 0
+
         for item in all_results:
             full_text = (item["title"] + " " + item.get("text", "")).strip()
             score, hits = relevance_score(full_text)
@@ -344,31 +354,34 @@ def main():
             item["hits"] = hits
 
             if score < 5:
+                discarded_low_score += 1
                 continue
 
             key = item.get("seen_key", item["link"])
 
             if key in seen:
+                discarded_seen += 1
                 continue
 
             if key in seen_keys_run:
+                discarded_same_run += 1
                 continue
 
             new_items.append(item)
             seen.append(key)
             seen_keys_run.add(key)
 
+        debug.append(f"scartati per score basso: {discarded_low_score}")
+        debug.append(f"scartati perché già visti: {discarded_seen}")
+        debug.append(f"scartati per duplicato nello stesso run: {discarded_same_run}")
         debug.append(f"nuovi risultati dopo deduplica: {len(new_items)}")
 
         save_json("seen.json", seen)
         save_health(health)
 
-        subject = f"Monitor bandi – {len(new_items)} nuovi risultati" if new_items else "Monitor bandi – debug"
-
-        body = ""
-
         if new_items:
-            body += "Monitor bandi – nuovi risultati\n\n"
+            subject = f"Monitor bandi – {len(new_items)} nuovi risultati"
+            body = "Monitor bandi – nuovi risultati\n\n"
 
             for item in new_items:
                 body += (
@@ -379,7 +392,8 @@ def main():
                     f"{item['link']}\n\n"
                 )
         else:
-            body += "Nessun nuovo bando trovato.\n\n"
+            subject = "Monitor bandi – debug"
+            body = "Nessun nuovo bando trovato.\n\n"
 
         body += "DEBUG\n\n" + "\n".join(debug)
 
