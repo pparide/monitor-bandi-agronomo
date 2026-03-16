@@ -494,6 +494,7 @@ def main():
 
     try:
         sources = load_json("sources.json", [])
+        sources.extend(load_json("traspare_valid_sources.json", []))
         seen = load_json("seen.json", [])
         health = load_health()
 
