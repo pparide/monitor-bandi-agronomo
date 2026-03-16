@@ -83,6 +83,7 @@ def get_text_from_page(url):
 
     return soup.get_text(" ", strip=True)[:500]
 
+
 def slugify_comune(name):
     text = name.lower().strip()
 
@@ -96,6 +97,25 @@ def slugify_comune(name):
 
     text = text.replace(" ", "")
     return text
+
+
+def candidate_traspare_slugs(name):
+    base = slugify_comune(name)
+    candidates = {base}
+
+    if "cava de' tirreni" in name.lower():
+        candidates.add("cavadetirreni")
+    if "mercato san severino" in name.lower():
+        candidates.add("mercatosanseverino")
+    if "vallo della lucania" in name.lower():
+        candidates.add("vallodellalucania")
+    if "pontecagnano faiano" in name.lower():
+        candidates.add("pontecagnanofaiano")
+    if "capaccio paestum" in name.lower():
+        candidates.add("capacciopaestum")
+
+    return list(candidates)
+
 
 def generate_traspare_sources():
     comuni = load_json("comuni_sa_av.json", {})
@@ -114,30 +134,6 @@ def generate_traspare_sources():
 
     return sources
 
-
-def candidate_traspare_slugs(name):
-    base = slugify_comune(name)
-
-    candidates = {base}
-
-    # alcune varianti utili
-    candidates.add(base.replace("santangelo", "santangelo"))
-    candidates.add(base.replace("santa", "santa"))
-    candidates.add(base.replace("san", "san"))
-
-    # casi tipici
-    if "cava de' tirreni".lower() in name.lower():
-        candidates.add("cavadetirreni")
-    if "mercato san severino".lower() in name.lower():
-        candidates.add("mercatosanseverino")
-    if "vallo della lucania".lower() in name.lower():
-        candidates.add("vallodellalucania")
-    if "pontecagnano faiano".lower() in name.lower():
-        candidates.add("pontecagnanofaiano")
-    if "capaccio paestum".lower() in name.lower():
-        candidates.add("capacciopaestum")
-
-    return list(candidates)
 
 def is_recent(text, days=120):
     today = datetime.today()
@@ -230,11 +226,6 @@ def is_relevant(title):
     return False
 
 
-# -----------------------------
-# PARSER PDF ARCHIVE
-# -----------------------------
-
-
 def parse_pdf_archive(source):
     soup = get_page(source["url"])
 
@@ -288,17 +279,12 @@ def parse_pdf_archive(source):
                 {
                     "source": source["name"],
                     "title": title if title else "Documento di gara",
-                    "link": source["url"],   # pagina da mostrare
-                    "seen_key": pdf_link     # chiave per deduplica
+                    "link": source["url"],
+                    "seen_key": pdf_link
                 }
             )
 
     return results
-
-
-# -----------------------------
-# PARSER HTML LIST
-# -----------------------------
 
 
 def parse_html_list(source):
@@ -344,8 +330,6 @@ def parse_html_list(source):
 
         link = urljoin(source["url"], href)
 
-        # Pellezzano news/avvisi e simili: teniamo la pagina dell'avviso
-        # UNISA: teniamo solo la pagina HTML del bando, non il PDF
         if "unisa.it" in source["url"]:
             if link.lower().endswith(".pdf"):
                 continue
@@ -361,11 +345,6 @@ def parse_html_list(source):
         )
 
     return results
-
-
-# -----------------------------
-# PARSER TRASPARE
-# -----------------------------
 
 
 def parse_traspare(source):
@@ -385,7 +364,6 @@ def parse_traspare(source):
         link = urljoin(source["url"], href)
         l = link.lower()
 
-        # solo schede gara vere
         if not re.search(r"/announcements/\d+/?$", l):
             continue
 
@@ -400,7 +378,6 @@ def parse_traspare(source):
         if not title or len(title) < 8:
             title = page_text
 
-        # solo gare recenti
         if not is_recent(page_text):
             continue
 
@@ -413,11 +390,6 @@ def parse_traspare(source):
         )
 
     return results
-
-
-# -----------------------------
-# PARSER PORTALE APPALTI
-# -----------------------------
 
 
 def parse_portale_appalti(source):
@@ -439,7 +411,6 @@ def parse_portale_appalti(source):
         link = urljoin(source["url"], href)
         text = f"{title} {href}".lower()
 
-        # prendiamo solo link chiaramente legati a bandi/avvisi
         if not any(k in text for k in [
             "bando",
             "gara",
@@ -450,7 +421,6 @@ def parse_portale_appalti(source):
         ]):
             continue
 
-        # scarta roba generica o tecnica di navigazione
         if any(k in text for k in [
             "home",
             "pagina iniziale",
@@ -469,7 +439,6 @@ def parse_portale_appalti(source):
 
         seen_links.add(link)
 
-        # se il titolo è debole, prova a leggere la pagina
         if not title or len(title) < 8:
             title = get_text_from_page(link)
 
@@ -484,34 +453,29 @@ def parse_portale_appalti(source):
     return results
 
 
-# -----------------------------
-# MAIN
-# -----------------------------
-
-
 def main():
     debug = []
 
     try:
         sources = load_json("sources.json", [])
         sources.extend(load_json("traspare_valid_sources.json", []))
+
         unique_sources = []
         seen_urls = set()
 
         for s in sources:
-
             url = s.get("url", "").strip()
 
             if not url:
                 continue
 
-        if url in seen_urls:
-            continue
+            if url in seen_urls:
+                continue
 
-        seen_urls.add(url)
-        unique_sources.append(s)
+            seen_urls.add(url)
+            unique_sources.append(s)
 
-    sources = unique_sources
+        sources = unique_sources
 
         seen = load_json("seen.json", [])
         health = load_health()
@@ -538,22 +502,9 @@ def main():
 
             debug.append(f"{source_name}: risultati parser={len(results)}")
 
-            previous_zero_runs = health.get(source_name, {}).get("zero_runs", 0)
-
-            if len(results) == 0:
-                zero_runs = previous_zero_runs + 1
-            else:
-                zero_runs = 0
-
             health[source_name] = {
-                "last_results": len(results),
-                "zero_runs": zero_runs
+                "last_results": len(results)
             }
-
-            if zero_runs >= 3:
-                debug.append(
-                    f"⚠️ POSSIBILE PROBLEMA STRUTTURA O URL: {source_name} ha 0 risultati da {zero_runs} run consecutivi"
-                )
 
             all_results.extend(results)
 
@@ -586,18 +537,13 @@ def main():
         save_health(health)
         debug.append("source_health.json salvato")
 
-        warnings = [d for d in debug if "⚠️" in d]
-
         if not new_items:
             subject = "Monitor bandi – debug"
             body = "Nessun nuovo bando trovato.\n\nDEBUG\n\n" + "\n".join(debug)
             send_email(subject, body)
             return
-            
-          
 
         subject = f"Monitor bandi – {len(new_items)} nuovi risultati"
-
         body = "Monitor bandi – nuovi risultati\n\n"
 
         for item in new_items:
@@ -606,12 +552,6 @@ def main():
                 f"{item['title']}\n"
                 f"{item['link']}\n\n"
             )
-
-        if warnings:
-            body += "ATTENZIONE POSSIBILI PROBLEMI FONTI\n\n"
-            for w in warnings:
-                body += w + "\n"
-            body += "\n"
 
         body += "DEBUG\n" + "\n".join(debug)
 
