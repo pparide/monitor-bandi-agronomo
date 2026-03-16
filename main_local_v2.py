@@ -18,7 +18,7 @@ EMAIL_TO = os.environ["EMAIL_TO"]
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 # fonte da ispezionare nei risultati scartati
-AUDIT_SOURCE = "Provincia di Salerno"
+AUDIT_SOURCE = "Comune di Salerno"
 AUDIT_LIMIT = 10
 
 
