@@ -9,7 +9,6 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-
 EMAIL_HOST = os.environ["EMAIL_HOST"]
 EMAIL_PORT = int(os.environ["EMAIL_PORT"])
 EMAIL_USER = os.environ["EMAIL_USER"]
@@ -47,44 +46,33 @@ def send_email(subject, body):
 def get_page(url):
     try:
         r = requests.get(url, headers=HEADERS, timeout=30)
-
         if r.status_code != 200:
             return None
-
         if len(r.text) < 300:
             return None
-
         return BeautifulSoup(r.text, "html.parser")
-
     except Exception:
         return None
 
 
 def get_page_text(url):
-
     soup = get_page(url)
-
     if not soup:
         return ""
 
     text = soup.get_text(" ", strip=True)
-
     return re.sub(r"\s+", " ", text)[:4000]
 
 
 def get_best_title_from_page(url):
-
     soup = get_page(url)
-
     if not soup:
         return ""
 
     for tag in ["h1", "h2", "title"]:
         el = soup.find(tag)
-
         if el:
             text = el.get_text(" ", strip=True)
-
             if text:
                 return text
 
@@ -92,33 +80,23 @@ def get_best_title_from_page(url):
 
 
 def is_recent(text, days=120):
-
     today = datetime.today()
     limit = today - timedelta(days=days)
 
     pattern = r"\b\d{2}/\d{2}/\d{4}\b"
 
     for match in re.findall(pattern, text):
-
         try:
             d = datetime.strptime(match, "%d/%m/%Y")
-
             if d >= limit:
                 return True
-
         except Exception:
             pass
 
     return False
 
 
-# -----------------------------
-# SCORING
-# -----------------------------
-
-
 def keyword_score(text):
-
     text = text.lower()
 
     positive = {
@@ -165,6 +143,9 @@ def keyword_score(text):
         "strength": -8,
         "rifiuti": -6,
         "igiene urbana": -6,
+        "cultural heritage": -6,
+        "europrogettazione": -6,
+        "beni culturali": -4,
     }
 
     score = 0
@@ -183,15 +164,26 @@ def keyword_score(text):
     return score, hits
 
 
-# -----------------------------
-# PARSER HTML LIST
-# -----------------------------
+def is_generic_bad_title(title):
+    t = title.strip().lower()
+
+    bad_titles = [
+        "vai alla pagina",
+        "home",
+        "pagina iniziale",
+        "clicca qui",
+        "maggiori informazioni",
+        "leggi tutto",
+        "scarica",
+        "download",
+        "procedure di gara",
+    ]
+
+    return t in bad_titles
 
 
 def parse_html_list(source):
-
     soup = get_page(source["url"])
-
     if not soup:
         return []
 
@@ -208,11 +200,13 @@ def parse_html_list(source):
     ]
 
     for a in soup.find_all("a", href=True):
-
         href = a["href"].strip()
         title = a.get_text(" ", strip=True)
 
         if not href:
+            continue
+
+        if is_generic_bad_title(title):
             continue
 
         text = (title + " " + href).lower()
@@ -224,15 +218,22 @@ def parse_html_list(source):
 
         if link in seen_links:
             continue
-
         seen_links.add(link)
 
+        # UNISA: tieni solo la pagina HTML del bando, mai PDF
+        if "unisa.it" in source["url"].lower() or "università di salerno" in source["name"].lower():
+            if link.lower().endswith(".pdf"):
+                continue
+            if "bando=" not in link and "anno=" not in link:
+                continue
+
         page_text = get_page_text(link)
+        best_title = title if title else get_best_title_from_page(link)
 
         results.append(
             {
                 "source": source["name"],
-                "title": title if title else get_best_title_from_page(link),
+                "title": best_title if best_title else "Avviso",
                 "link": link,
                 "text": page_text,
             }
@@ -241,15 +242,8 @@ def parse_html_list(source):
     return results
 
 
-# -----------------------------
-# PARSER TRASPARE
-# -----------------------------
-
-
 def parse_traspare(source):
-
     soup = get_page(source["url"])
-
     if not soup:
         return []
 
@@ -257,9 +251,7 @@ def parse_traspare(source):
     seen_links = set()
 
     for a in soup.find_all("a", href=True):
-
         href = a["href"].strip()
-
         if not href:
             continue
 
@@ -270,11 +262,9 @@ def parse_traspare(source):
 
         if link in seen_links:
             continue
-
         seen_links.add(link)
 
         title = a.get_text(" ", strip=True)
-
         page_text = get_page_text(link)
 
         if not page_text:
@@ -283,10 +273,16 @@ def parse_traspare(source):
         if not is_recent(page_text):
             continue
 
+        if not title or len(title) < 8:
+            title = page_text[:200]
+
+        if is_generic_bad_title(title):
+            continue
+
         results.append(
             {
                 "source": source["name"],
-                "title": title if title else page_text[:200],
+                "title": title if title else "Procedura di gara",
                 "link": link,
                 "text": page_text,
             }
@@ -295,17 +291,10 @@ def parse_traspare(source):
     return results
 
 
-# -----------------------------
-# MAIN
-# -----------------------------
-
-
 def main():
-
     debug = []
 
     try:
-
         sources = load_json("sources.json", [])
         sources.extend(load_json("traspare_valid_sources.json", []))
 
@@ -313,7 +302,6 @@ def main():
         seen_urls = set()
 
         for s in sources:
-
             url = s.get("url", "").strip()
 
             if not url:
@@ -335,21 +323,17 @@ def main():
         all_results = []
 
         for source in sources:
-
             source_type = source.get("type", "")
             source_name = source.get("name", "fonte")
 
             if source_type == "html_list":
                 results = parse_html_list(source)
-
             elif source_type == "traspare":
                 results = parse_traspare(source)
-
             else:
                 results = []
 
             debug.append(f"{source_name}: risultati parser={len(results)}")
-
             all_results.extend(results)
 
         debug.append(f"totale risultati grezzi: {len(all_results)}")
@@ -362,21 +346,20 @@ def main():
         discarded_same_run = 0
 
         for item in all_results:
-
             title = item["title"]
             text = item.get("text", "")
 
             title_score, title_hits = keyword_score(title)
             text_score, text_hits = keyword_score(text)
 
-            final_score = title_score * 2 + text_score
+            final_score = title_score * 3 + text_score
 
-            item["score"] = final_score
-            item["hits"] = title_hits + text_hits
             item["title_score"] = title_score
             item["text_score"] = text_score
+            item["score"] = final_score
+            item["hits"] = title_hits + text_hits
 
-            if final_score < 6:
+            if final_score < 8:
                 discarded_low_score += 1
                 continue
 
@@ -402,13 +385,10 @@ def main():
         save_json("seen.json", seen)
 
         if new_items:
-
             subject = f"Monitor bandi – {len(new_items)} nuovi risultati"
-
             body = "Monitor bandi – nuovi risultati\n\n"
 
             for item in new_items:
-
                 body += (
                     f"{item['source']}\n"
                     f"{item['title']}\n"
@@ -418,9 +398,7 @@ def main():
                     f"match: {', '.join(item['hits'][:10])}\n"
                     f"{item['link']}\n\n"
                 )
-
         else:
-
             subject = "Monitor bandi – debug"
             body = "Nessun nuovo bando trovato.\n\n"
 
@@ -429,10 +407,8 @@ def main():
         send_email(subject, body)
 
     except Exception as e:
-
         subject = "Monitor bandi – errore"
         body = f"Errore monitor:\n\n{repr(e)}"
-
         send_email(subject, body)
 
 
