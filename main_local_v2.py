@@ -83,6 +83,44 @@ def get_text_from_page(url):
 
     return soup.get_text(" ", strip=True)[:500]
 
+def slugify_comune(name):
+    text = name.lower().strip()
+
+    replacements = {
+        "à": "a", "è": "e", "é": "e", "ì": "i", "ò": "o", "ù": "u",
+        "'": "", "’": "", ".": "", ",": "", "-": "", "/": "",
+    }
+
+    for old, new in replacements.items():
+        text = text.replace(old, new)
+
+    text = text.replace(" ", "")
+    return text
+
+
+def candidate_traspare_slugs(name):
+    base = slugify_comune(name)
+
+    candidates = {base}
+
+    # alcune varianti utili
+    candidates.add(base.replace("santangelo", "santangelo"))
+    candidates.add(base.replace("santa", "santa"))
+    candidates.add(base.replace("san", "san"))
+
+    # casi tipici
+    if "cava de' tirreni".lower() in name.lower():
+        candidates.add("cavadetirreni")
+    if "mercato san severino".lower() in name.lower():
+        candidates.add("mercatosanseverino")
+    if "vallo della lucania".lower() in name.lower():
+        candidates.add("vallodellalucania")
+    if "pontecagnano faiano".lower() in name.lower():
+        candidates.add("pontecagnanofaiano")
+    if "capaccio paestum".lower() in name.lower():
+        candidates.add("capacciopaestum")
+
+    return list(candidates)
 
 def is_recent(text, days=120):
     today = datetime.today()
