@@ -97,6 +97,23 @@ def slugify_comune(name):
     text = text.replace(" ", "")
     return text
 
+def generate_traspare_sources():
+    comuni = load_json("comuni_sa_av.json", {})
+    sources = []
+
+    for provincia in ["salerno", "avellino"]:
+        for comune in comuni.get(provincia, []):
+            for slug in candidate_traspare_slugs(comune):
+                sources.append(
+                    {
+                        "name": f"Comune di {comune}",
+                        "url": f"https://{slug}.traspare.com/announcements",
+                        "type": "traspare"
+                    }
+                )
+
+    return sources
+
 
 def candidate_traspare_slugs(name):
     base = slugify_comune(name)
@@ -477,6 +494,20 @@ def main():
 
     try:
         sources = load_json("sources.json", [])
+        sources.extend(generate_traspare_sources())
+        
+        unique_sources = []
+        seen_source_urls = set()
+
+        for source in sources:
+            url = source.get("url", "").strip()
+            if not url or url in seen_source_urls:
+            continue
+            seen_source_urls.add(url)
+            unique_sources.append(source)
+
+        sources = unique_sources
+        
         seen = load_json("seen.json", [])
         health = load_health()
 
