@@ -1,4 +1,4 @@
-name: Monitor Locale V3
+name: Monitor Locale V2
 
 on:
   workflow_dispatch:
@@ -31,7 +31,7 @@ jobs:
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
-        run: python main_local_v3.py
+        run: python main_local_v2.py
 
       - name: Commit updated monitor state
         run: |
