@@ -31,12 +31,66 @@ def save_json(path, data):
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 
-def load_health():
-    return load_json("source_health.json", {})
+def normalize_sources(data):
+    if not isinstance(data, list):
+        return []
+
+    cleaned = []
+    for item in data:
+        if not isinstance(item, dict):
+            continue
+
+        name = item.get("name")
+        url = item.get("url")
+        source_type = item.get("type")
+
+        if not isinstance(name, str) or not isinstance(url, str) or not isinstance(source_type, str):
+            continue
+
+        cleaned.append(
+            {
+                "name": name.strip(),
+                "url": url.strip(),
+                "type": source_type.strip(),
+            }
+        )
+
+    return cleaned
 
 
-def save_health(data):
-    save_json("source_health.json", data)
+def normalize_seen(data):
+    if not isinstance(data, list):
+        return []
+
+    cleaned = []
+    for item in data:
+        if isinstance(item, str) and item.strip():
+            cleaned.append(item.strip())
+
+    return cleaned
+
+
+def normalize_health(data):
+    if not isinstance(data, dict):
+        return {}
+
+    cleaned = {}
+
+    for source_name, stats in data.items():
+        if not isinstance(source_name, str):
+            continue
+
+        if not isinstance(stats, dict):
+            stats = {}
+
+        cleaned[source_name] = {
+            "runs": int(stats.get("runs", 0) or 0),
+            "results": int(stats.get("results", 0) or 0),
+            "relevant": int(stats.get("relevant", 0) or 0),
+            "zero_runs": int(stats.get("zero_runs", 0) or 0),
+        }
+
+    return cleaned
 
 
 def send_email(subject, body):
@@ -202,17 +256,10 @@ def compute_score(item):
     title_score, title_hits = keyword_score(title)
     text_score, text_hits = keyword_score(text)
 
-    # Il titolo pesa di più del corpo pagina
     final_score = title_score * 3 + int(text_score * 0.7)
-
     hits = sorted(set(title_hits + text_hits))
 
     return final_score, title_score, text_score, hits
-
-
-# -----------------------------
-# PARSER HTML LIST
-# -----------------------------
 
 
 def parse_html_list(source):
@@ -253,7 +300,6 @@ def parse_html_list(source):
             continue
         seen_links.add(link)
 
-        # UNISA: tieni solo la pagina HTML del bando, mai PDF
         if "unisa.it" in source["url"].lower() or "università di salerno" in source["name"].lower():
             if link.lower().endswith(".pdf"):
                 continue
@@ -273,11 +319,6 @@ def parse_html_list(source):
         )
 
     return results
-
-
-# -----------------------------
-# PARSER TRASPARE
-# -----------------------------
 
 
 def parse_traspare(source):
@@ -329,27 +370,20 @@ def parse_traspare(source):
     return results
 
 
-# -----------------------------
-# MAIN
-# -----------------------------
-
-
 def main():
     debug = []
 
     try:
-        sources = load_json("sources.json", [])
-        sources.extend(load_json("traspare_valid_sources.json", []))
+        manual_sources = normalize_sources(load_json("sources.json", []))
+        traspare_sources = normalize_sources(load_json("traspare_valid_sources.json", []))
 
-        # deduplica fonti
+        sources = manual_sources + traspare_sources
+
         unique_sources = []
         seen_urls = set()
 
         for s in sources:
-            url = s.get("url", "").strip()
-
-            if not url:
-                continue
+            url = s["url"]
 
             if url in seen_urls:
                 continue
@@ -359,8 +393,8 @@ def main():
 
         sources = unique_sources
 
-        seen = load_json("seen.json", [])
-        health = load_health()
+        seen = normalize_seen(load_json("seen.json", []))
+        health = normalize_health(load_json("source_health.json", {}))
 
         debug.append(f"fonti caricate: {len(sources)}")
         debug.append(f"seen caricati: {len(seen)}")
@@ -368,8 +402,8 @@ def main():
         all_results = []
 
         for source in sources:
-            source_type = source.get("type", "")
-            source_name = source.get("name", "fonte")
+            source_type = source["type"]
+            source_name = source["name"]
 
             if source_type == "html_list":
                 results = parse_html_list(source)
@@ -443,21 +477,20 @@ def main():
         debug.append(f"nuovi risultati dopo deduplica: {len(new_items)}")
 
         save_json("seen.json", seen)
-        save_health(health)
+        save_json("source_health.json", health)
 
         debug.append("seen.json salvato")
         debug.append("source_health.json salvato")
-
         debug.append("")
         debug.append("STATISTICHE FONTI")
 
         for name, data in health.items():
             line = (
                 f"{name} | "
-                f"runs={data['runs']} "
-                f"results={data['results']} "
-                f"relevant={data['relevant']} "
-                f"zero_runs={data['zero_runs']}"
+                f"runs={data.get('runs', 0)} "
+                f"results={data.get('results', 0)} "
+                f"relevant={data.get('relevant', 0)} "
+                f"zero_runs={data.get('zero_runs', 0)}"
             )
             debug.append(line)
 
