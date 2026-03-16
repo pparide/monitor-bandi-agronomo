@@ -495,6 +495,24 @@ def main():
     try:
         sources = load_json("sources.json", [])
         sources.extend(load_json("traspare_valid_sources.json", []))
+        unique_sources = []
+        seen_urls = set()
+
+        for s in sources:
+
+            url = s.get("url", "").strip()
+
+            if not url:
+                continue
+
+        if url in seen_urls:
+            continue
+
+        seen_urls.add(url)
+        unique_sources.append(s)
+
+    sources = unique_sources
+
         seen = load_json("seen.json", [])
         health = load_health()
 
