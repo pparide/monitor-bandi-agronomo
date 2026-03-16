@@ -1,58 +1,1118 @@
 {
   "Comune di Pellezzano": {
-    "last_results": 4,
-    "zero_runs": 0
+    "last_results": 0,
+    "zero_runs": 1
   },
   "Comune di Salerno": {
     "last_results": 0,
-    "zero_runs": 5
+    "zero_runs": 7
   },
   "Provincia di Salerno": {
     "last_results": 0,
-    "zero_runs": 5
+    "zero_runs": 6
   },
   "Comune di Baronissi": {
     "last_results": 0,
-    "zero_runs": 5
+    "zero_runs": 6
   },
   "Comune di Cava de' Tirreni": {
     "last_results": 0,
-    "zero_runs": 5
+    "zero_runs": 6
   },
   "Comune di Battipaglia": {
     "last_results": 0,
-    "zero_runs": 5
+    "zero_runs": 6
   },
   "Comune di Eboli": {
     "last_results": 0,
-    "zero_runs": 5
+    "zero_runs": 6
   },
   "Comune di Agropoli": {
     "last_results": 0,
-    "zero_runs": 5
+    "zero_runs": 6
   },
   "Comune di Sapri": {
     "last_results": 0,
-    "zero_runs": 5
+    "zero_runs": 6
   },
   "Parco Nazionale del Cilento": {
     "last_results": 0,
-    "zero_runs": 5
+    "zero_runs": 6
   },
   "Regione Campania Agricoltura": {
     "last_results": 0,
-    "zero_runs": 5
+    "zero_runs": 6
   },
   "Regione Campania Gare": {
     "last_results": 0,
-    "zero_runs": 5
+    "zero_runs": 6
   },
   "Università di Salerno Collaborazioni": {
-    "last_results": 11,
+    "last_results": 12,
     "zero_runs": 0
   },
   "ASMECOMM Gare": {
     "last_results": 0,
-    "zero_runs": 5
+    "zero_runs": 6
+  },
+  "Comune di Acerno": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Albanella": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Alfano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Altavilla Silentina": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Amalfi": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Angri": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Aquara": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Ascea": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Atena Lucana": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Atrani": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Auletta": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Bellizzi": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Bellosguardo": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Bracigliano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Buccino": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Buonabitacolo": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Caggiano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Calvanico": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Camerota": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Campagna": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Campora": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Cannalonga": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Capaccio Paestum": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Casalbuono": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Casaletto Spartano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Casal Velino": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Caselle in Pittari": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Castelcivita": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Castellabate": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Castelnuovo Cilento": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Castelnuovo di Conza": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Castiglione del Genovesi": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Celle di Bulgheria": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Centola": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Ceraso": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Cetara": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Cicerale": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Colliano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Conca dei Marini": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Controne": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Contursi Terme": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Corbara": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Corleto Monforte": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Cuccaro Vetere": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Felitto": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Fisciano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Furore": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Futani": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Giffoni Sei Casali": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Giffoni Valle Piana": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Gioi": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Giungano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Ispani": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Laureana Cilento": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Laurino": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Laurito": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Laviano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Lustra": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Magliano Vetere": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Maiori": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Mercato San Severino": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Minori": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Moio della Civitella": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Montano Antilia": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Montecorice": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Montecorvino Pugliano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Montecorvino Rovella": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Monteforte Cilento": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Monte San Giacomo": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Montesano sulla Marcellana": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Morigerati": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Nocera Inferiore": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Nocera Superiore": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Novi Velia": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Ogliastro Cilento": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Olevano sul Tusciano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Oliveto Citra": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Omignano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Orria": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Ottati": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Padula": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Pagani": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Palomonte": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Perdifumo": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Perito": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Pertosa": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Petina": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Piaggine": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Pisciotta": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Polla": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Pollica": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Pontecagnano Faiano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Positano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Postiglione": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Praiano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Prignano Cilento": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Ravello": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Ricigliano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Roccadaspide": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Roccagloriosa": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Roccapiemonte": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Rofrano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Romagnano al Monte": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Roscigno": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Rutino": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Sacco": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Sala Consilina": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Salento": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Salvitelle": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di San Cipriano Picentino": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di San Giovanni a Piro": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di San Gregorio Magno": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di San Mango Piemonte": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di San Marzano sul Sarno": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di San Mauro Cilento": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di San Mauro la Bruca": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di San Pietro al Tanagro": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di San Rufo": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Santa Marina": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Sant'Angelo a Fasanella": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Sant'Arsenio": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Sant'Egidio del Monte Albino": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Santomenna": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di San Valentino Torio": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Sarno": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Sassano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Scafati": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Scala": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Serramezzana": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Serre": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Sessa Cilento": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Siano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Sicignano degli Alburni": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Stella Cilento": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Stio": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Teggiano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Torchiara": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Torraca": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Torre Orsaia": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Tortorella": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Tramonti": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Trentinara": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Valle dell'Angelo": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Vallo della Lucania": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Valva": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Vibonati": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Vietri sul Mare": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Aiello del Sabato": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Altavilla Irpina": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Andretta": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Aquilonia": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Ariano Irpino": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Atripalda": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Avella": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Avellino": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Bagnoli Irpino": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Baiano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Bisaccia": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Bonito": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Cairano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Calabritto": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Calitri": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Candida": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Caposele": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Capriglia Irpina": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Carife": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Casalbore": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Cassano Irpino": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Castel Baronia": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Castelfranci": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Castelvetere sul Calore": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Cervinara": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Cesinali": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Chianche": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Chiusano di San Domenico": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Contrada": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Conza della Campania": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Domicella": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Flumeri": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Fontanarosa": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Forino": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Frigento": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Gesualdo": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Greci": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Grottaminarda": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Grottolella": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Guardia Lombardi": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Lacedonia": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Lapio": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Lauro": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Lioni": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Luogosano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Manocalzati": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Marzano di Nola": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Melito Irpino": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Mercogliano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Mirabella Eclano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Montaguto": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Montecalvo Irpino": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Montefalcione": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Monteforte Irpino": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Montefredane": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Montefusco": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Montella": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Montemarano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Montemiletto": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Monteverde": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Montoro": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Morra De Sanctis": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Moschiano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Mugnano del Cardinale": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Nusco": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Ospedaletto d'Alpinolo": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Pago del Vallo di Lauro": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Parolise": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Paternopoli": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Petruro Irpino": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Pietradefusi": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Pietrastornina": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Prata di Principato Ultra": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Pratola Serra": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Quadrelle": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Quindici": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Rocca San Felice": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Roccabascerana": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Rotondi": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Salza Irpina": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di San Mango sul Calore": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di San Martino Valle Caudina": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di San Michele di Serino": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di San Nicola Baronia": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di San Potito Ultra": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di San Sossio Baronia": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Sant'Andrea di Conza": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Sant'Angelo a Scala": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Sant'Angelo all'Esca": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Sant'Angelo dei Lombardi": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Santa Lucia di Serino": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Santa Paolina": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Santo Stefano del Sole": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Savignano Irpino": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Scampitella": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Senerchia": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Serino": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Sirignano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Solofra": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Sorbo Serpico": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Sperone": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Sturno": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Summonte": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Taurano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Taurasi": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Teora": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Torella dei Lombardi": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Torre Le Nocelle": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Torrioni": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Trevico": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Tufo": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Vallata": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Vallesaccarda": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Venticano": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Villamaina": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Villanova del Battista": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Volturara Irpina": {
+    "last_results": 0,
+    "zero_runs": 1
+  },
+  "Comune di Zungoli": {
+    "last_results": 0,
+    "zero_runs": 1
   }
 }
