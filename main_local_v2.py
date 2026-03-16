@@ -502,7 +502,7 @@ def main():
         for source in sources:
             url = source.get("url", "").strip()
             if not url or url in seen_source_urls:
-            continue
+                continue
             seen_source_urls.add(url)
             unique_sources.append(source)
 
