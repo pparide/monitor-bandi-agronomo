@@ -1,140 +1,140 @@
 {
   "Comune di Pellezzano": {
-    "runs": 11,
-    "results": 20,
+    "runs": 12,
+    "results": 22,
     "relevant": 0,
     "zero_runs": 0
   },
   "Comune di Salerno": {
-    "runs": 11,
+    "runs": 12,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 11
+    "zero_runs": 12
   },
   "Provincia di Salerno": {
-    "runs": 11,
-    "results": 25,
+    "runs": 12,
+    "results": 30,
     "relevant": 0,
-    "zero_runs": 3
+    "zero_runs": 0
   },
   "Comune di Baronissi": {
-    "runs": 11,
+    "runs": 12,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 11
+    "zero_runs": 12
   },
   "Comune di Cava de' Tirreni": {
-    "runs": 11,
-    "results": 25,
-    "relevant": 1,
-    "zero_runs": 3
-  },
-  "Comune di Battipaglia": {
-    "runs": 11,
-    "results": 0,
-    "relevant": 0,
-    "zero_runs": 11
-  },
-  "Comune di Eboli": {
-    "runs": 11,
-    "results": 0,
-    "relevant": 0,
-    "zero_runs": 11
-  },
-  "Comune di Agropoli": {
-    "runs": 11,
-    "results": 0,
-    "relevant": 0,
-    "zero_runs": 11
-  },
-  "Comune di Sapri": {
-    "runs": 11,
-    "results": 0,
-    "relevant": 0,
-    "zero_runs": 11
-  },
-  "Parco Nazionale del Cilento": {
-    "runs": 11,
-    "results": 0,
-    "relevant": 0,
-    "zero_runs": 11
-  },
-  "Regione Campania Agricoltura": {
-    "runs": 11,
-    "results": 0,
-    "relevant": 0,
-    "zero_runs": 11
-  },
-  "Regione Campania Gare": {
-    "runs": 11,
-    "results": 0,
-    "relevant": 0,
-    "zero_runs": 11
-  },
-  "Università di Salerno Collaborazioni": {
-    "runs": 11,
-    "results": 120,
+    "runs": 12,
+    "results": 30,
     "relevant": 1,
     "zero_runs": 0
   },
-  "ASMECOMM Gare": {
-    "runs": 11,
+  "Comune di Battipaglia": {
+    "runs": 12,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 11
+    "zero_runs": 12
+  },
+  "Comune di Eboli": {
+    "runs": 12,
+    "results": 0,
+    "relevant": 0,
+    "zero_runs": 12
+  },
+  "Comune di Agropoli": {
+    "runs": 12,
+    "results": 0,
+    "relevant": 0,
+    "zero_runs": 12
+  },
+  "Comune di Sapri": {
+    "runs": 12,
+    "results": 0,
+    "relevant": 0,
+    "zero_runs": 12
+  },
+  "Parco Nazionale del Cilento": {
+    "runs": 12,
+    "results": 0,
+    "relevant": 0,
+    "zero_runs": 12
+  },
+  "Regione Campania Agricoltura": {
+    "runs": 12,
+    "results": 0,
+    "relevant": 0,
+    "zero_runs": 12
+  },
+  "Regione Campania Gare": {
+    "runs": 12,
+    "results": 0,
+    "relevant": 0,
+    "zero_runs": 12
+  },
+  "Università di Salerno Collaborazioni": {
+    "runs": 12,
+    "results": 120,
+    "relevant": 1,
+    "zero_runs": 1
+  },
+  "ASMECOMM Gare": {
+    "runs": 12,
+    "results": 0,
+    "relevant": 0,
+    "zero_runs": 12
   },
   "Comune di Bonito": {
-    "runs": 11,
+    "runs": 12,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 11
+    "zero_runs": 12
   },
   "Comune di Cervinara": {
-    "runs": 11,
+    "runs": 12,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 11
+    "zero_runs": 12
   },
   "Comune di Flumeri": {
-    "runs": 11,
+    "runs": 12,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 11
+    "zero_runs": 12
   },
   "Comune di Fontanarosa": {
-    "runs": 11,
+    "runs": 12,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 11
+    "zero_runs": 12
   },
   "Comune di Frigento": {
-    "runs": 11,
+    "runs": 12,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 11
+    "zero_runs": 12
   },
   "Comune di Gesualdo": {
-    "runs": 11,
+    "runs": 12,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 11
+    "zero_runs": 12
   },
   "Comune di Grottaminarda": {
-    "runs": 11,
-    "results": 5,
+    "runs": 12,
+    "results": 6,
     "relevant": 1,
-    "zero_runs": 3
+    "zero_runs": 0
   },
   "Comune di Melito Irpino": {
-    "runs": 11,
+    "runs": 12,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 11
+    "zero_runs": 12
   },
   "Comune di Sturno": {
-    "runs": 11,
+    "runs": 12,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 11
+    "zero_runs": 12
   }
 }
