@@ -213,6 +213,18 @@ def keyword_score(text):
         "servizi di ingegneria": 2,
         "progettazione": 2,
         "direzione lavori": 2,
+        "vinca": 8,
+        "valutazione di incidenza": 8,
+        "incidenza ambientale": 7,
+        "commissione locale per il paesaggio": 9,
+        "commissione paesaggio": 8,
+        "paesaggistica": 6,
+        "autorizzazione paesaggistica": 7,
+        "commissione esperti": 4,
+        "esperti ambientali": 5,
+        "esperti in materia ambientale": 6,
+        "componente esperto": 5,
+        "nomina componenti": 5,
     }
 
     negative = {
