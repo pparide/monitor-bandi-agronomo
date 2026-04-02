@@ -18,16 +18,16 @@
     "zero_runs": 7
   },
   "Comune di Baronissi": {
-    "runs": 54,
+    "runs": 55,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 54
+    "zero_runs": 55
   },
   "Comune di Cava de' Tirreni": {
-    "runs": 54,
-    "results": 95,
-    "relevant": 2,
-    "zero_runs": 7
+    "runs": 55,
+    "results": 100,
+    "relevant": 4,
+    "zero_runs": 0
   },
   "Comune di Battipaglia": {
     "runs": 54,
@@ -84,57 +84,57 @@
     "zero_runs": 54
   },
   "Comune di Bonito": {
-    "runs": 54,
+    "runs": 55,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 54
+    "zero_runs": 55
   },
   "Comune di Cervinara": {
-    "runs": 54,
+    "runs": 55,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 54
+    "zero_runs": 55
   },
   "Comune di Flumeri": {
-    "runs": 54,
+    "runs": 55,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 54
+    "zero_runs": 55
   },
   "Comune di Fontanarosa": {
-    "runs": 54,
-    "results": 0,
+    "runs": 55,
+    "results": 1,
     "relevant": 0,
-    "zero_runs": 54
+    "zero_runs": 0
   },
   "Comune di Frigento": {
-    "runs": 54,
+    "runs": 55,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 54
+    "zero_runs": 55
   },
   "Comune di Gesualdo": {
-    "runs": 54,
+    "runs": 55,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 54
+    "zero_runs": 55
   },
   "Comune di Grottaminarda": {
-    "runs": 54,
-    "results": 19,
-    "relevant": 1,
-    "zero_runs": 7
+    "runs": 55,
+    "results": 20,
+    "relevant": 2,
+    "zero_runs": 0
   },
   "Comune di Melito Irpino": {
-    "runs": 54,
+    "runs": 55,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 54
+    "zero_runs": 55
   },
   "Comune di Sturno": {
-    "runs": 54,
+    "runs": 55,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 54
+    "zero_runs": 55
   }
 }
