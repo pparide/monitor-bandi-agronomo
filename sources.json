@@ -69,4 +69,24 @@
     "url": "https://piattaforma.asmecomm.it/gare/",
     "type": "html_list"
   }
+  {
+  "name": "Comune di San Cipriano Picentino",
+  "url": "https://www.comune.sanciprianopicentino.sa.it/",
+  "type": "html_list"
+},
+{
+  "name": "Comune di Fisciano",
+  "url": "https://www.comune.fisciano.sa.it/",
+  "type": "html_list"
+},
+{
+  "name": "Comune di Mercato San Severino",
+  "url": "https://www.comune.mercatosanseverino.sa.it/",
+  "type": "html_list"
+},
+{
+  "name": "Comune di Pontecagnano Faiano",
+  "url": "https://www.comune.pontecagnanofaiano.sa.it/index.php?id_sezione=11417&pagina=2",
+  "type": "html_list"
+}
 ]
