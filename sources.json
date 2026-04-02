@@ -70,8 +70,13 @@
     "type": "html_list"
   },
   {
-    "name": "Comune di San Cipriano Picentino",
-    "url": "https://www.comune.sanciprianopicentino.sa.it/",
+    "name": "Comune di San Cipriano Picentino Avvisi",
+    "url": "https://www.comune.sanciprianopicentino.sa.it/notizie/avvisi",
+    "type": "html_list"
+  },
+  {
+    "name": "Comune di San Cipriano Picentino Comunicati",
+    "url": "https://www.comune.sanciprianopicentino.sa.it/notizie/comunicati",
     "type": "html_list"
   },
   {
