@@ -123,6 +123,7 @@ def get_page_text(url):
     soup = get_page(url)
     if not soup:
         return ""
+
     text = soup.get_text(" ", strip=True)
     return re.sub(r"\s+", " ", text)[:6000]
 
@@ -154,6 +155,11 @@ def is_generic_bad_title(title):
         "scarica",
         "download",
         "procedure di gara",
+        "novità",
+        "amministrazione",
+        "vivere il comune",
+        "tutti gli argomenti",
+        "tutti gli eventi",
     ]
 
     return t in bad_titles
@@ -259,6 +265,39 @@ def same_domain(base_url, link):
         return False
 
 
+def path_looks_like_detail(link):
+    path = urlparse(link).path.lower()
+
+    good = [
+        "/notizie/",
+        "/news/",
+        "/avvisi/",
+        "/avviso/",
+        "/bando/",
+        "/bandi/",
+        "/albo/",
+        "/amministrazione-trasparente/",
+    ]
+
+    bad = [
+        "/amministrazione/",
+        "/servizi-categoria/",
+        "/argomento/",
+        "/servizi/",
+        "/vivere-il-comune/",
+        "/domande-frequenti/",
+        "/notizie/page/",
+    ]
+
+    if any(b in path for b in bad):
+        return False
+
+    if any(g in path for g in good):
+        return True
+
+    return False
+
+
 def parse_html_list(source):
     soup = get_page(source["url"])
     if not soup:
@@ -284,20 +323,6 @@ def parse_html_list(source):
         "esperti",
     ]
 
-    url_hints = [
-        "/news",
-        "/notizie",
-        "/avvisi",
-        "/avviso",
-        "/bandi",
-        "/bando",
-        "/albo",
-        "type=3",
-        "id_sezione",
-    ]
-
-    count_candidates = 0
-
     for a in soup.find_all("a", href=True):
         href = a["href"].strip()
         raw_title = a.get_text(" ", strip=True)
@@ -313,7 +338,6 @@ def parse_html_list(source):
             continue
         seen_links.add(link)
 
-        # Per i siti comunali normali, resta sullo stesso dominio
         if source["type"] == "html_list" and not same_domain(source["url"], link):
             if "unisa.it" not in link.lower():
                 continue
@@ -328,18 +352,13 @@ def parse_html_list(source):
         if any(k in probe_text for k in anchor_keywords):
             candidate = True
 
-        if any(h in link.lower() for h in url_hints):
+        if path_looks_like_detail(link):
             candidate = True
 
-        # in audit su San Cipriano allarghiamo moltissimo
-        if audit_mode and same_domain(source["url"], link):
-            if len(raw_title) >= 8:
-                candidate = True
-
+        # su San Cipriano NON allargare più a tutto il dominio
         if not candidate:
             continue
 
-        # UNISA: mai pdf, solo pagina html del bando
         if "unisa.it" in source["url"].lower() or "università di salerno" in source["name"].lower():
             if link.lower().endswith(".pdf"):
                 continue
@@ -348,13 +367,10 @@ def parse_html_list(source):
 
         page_text = get_page_text(link)
         best_title = raw_title if raw_title else get_best_title_from_page(link)
-
-        # secondo filtro sul contenuto pagina
         page_probe = (best_title + " " + page_text[:3000]).lower()
 
-        if not audit_mode:
-            if not any(k in page_probe for k in anchor_keywords):
-                continue
+        if not any(k in page_probe for k in anchor_keywords):
+            continue
 
         results.append(
             {
@@ -365,8 +381,7 @@ def parse_html_list(source):
             }
         )
 
-        count_candidates += 1
-        if audit_mode and count_candidates >= AUDIT_LIMIT:
+        if audit_mode and len(results) >= AUDIT_LIMIT:
             break
 
     return results
@@ -406,7 +421,6 @@ def parse_traspare(source):
         if is_generic_bad_title(title):
             continue
 
-        # NIENTE più filtro is_recent: tagliava occasioni utili
         results.append(
             {
                 "source": source["name"],
@@ -502,10 +516,8 @@ def main():
 
         for s in sources:
             url = s["url"]
-
             if url in seen_urls:
                 continue
-
             seen_urls.add(url)
             unique_sources.append(s)
 
