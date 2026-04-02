@@ -17,7 +17,6 @@ EMAIL_TO = os.environ["EMAIL_TO"]
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
-# fonte da ispezionare nei risultati scartati
 AUDIT_SOURCE = "Comune di Salerno"
 AUDIT_LIMIT = 10
 
@@ -238,7 +237,6 @@ def keyword_score(text):
         "riscossione": -10,
         "protes": -10,
         "acciaio": -8,
-        "fem": -8,
         "strength": -8,
         "rifiuti": -6,
         "igiene urbana": -6,
@@ -393,6 +391,74 @@ def parse_traspare(source):
     return results
 
 
+def parse_portale_appalti(source):
+    soup = get_page(source["url"])
+    if not soup:
+        return []
+
+    results = []
+    seen_links = set()
+
+    keywords = [
+        "bando",
+        "gara",
+        "avviso",
+        "procedura",
+        "affidamento",
+        "manifestazione",
+    ]
+
+    bad_fragments = [
+        "home",
+        "pagina iniziale",
+        "accedi",
+        "login",
+        "profilo",
+        "contatti",
+        "faq",
+        "help",
+        "manuale",
+    ]
+
+    for a in soup.find_all("a", href=True):
+        href = a["href"].strip()
+        title = a.get_text(" ", strip=True)
+
+        if not href:
+            continue
+
+        text = (title + " " + href).lower()
+
+        if not any(k in text for k in keywords):
+            continue
+
+        if any(k in text for k in bad_fragments):
+            continue
+
+        if is_generic_bad_title(title):
+            continue
+
+        link = urljoin(source["url"], href)
+
+        if link in seen_links:
+            continue
+        seen_links.add(link)
+
+        page_text = get_page_text(link)
+        best_title = title if title else get_best_title_from_page(link)
+
+        results.append(
+            {
+                "source": source["name"],
+                "title": best_title if best_title else "Procedura di gara",
+                "link": link,
+                "text": page_text,
+            }
+        )
+
+    return results
+
+
 def main():
     debug = []
     audit_discarded = []
@@ -433,6 +499,8 @@ def main():
                 results = parse_html_list(source)
             elif source_type == "traspare":
                 results = parse_traspare(source)
+            elif source_type == "portale_appalti":
+                results = parse_portale_appalti(source)
             else:
                 results = []
 
