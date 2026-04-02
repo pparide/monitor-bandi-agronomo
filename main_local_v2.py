@@ -3,8 +3,7 @@ import os
 import re
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
-from datetime import datetime, timedelta
+from urllib.parse import urljoin, urlparse
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -17,9 +16,8 @@ EMAIL_TO = os.environ["EMAIL_TO"]
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
-# fonte da auditare in dettaglio
 AUDIT_SOURCE = "Comune di San Cipriano Picentino"
-AUDIT_LIMIT = 20
+AUDIT_LIMIT = 25
 
 
 def load_json(path, default):
@@ -112,15 +110,11 @@ def send_email(subject, body):
 def get_page(url):
     try:
         r = requests.get(url, headers=HEADERS, timeout=30)
-
         if r.status_code != 200:
             return None
-
         if len(r.text) < 300:
             return None
-
         return BeautifulSoup(r.text, "html.parser")
-
     except Exception:
         return None
 
@@ -129,9 +123,8 @@ def get_page_text(url):
     soup = get_page(url)
     if not soup:
         return ""
-
     text = soup.get_text(" ", strip=True)
-    return re.sub(r"\s+", " ", text)[:5000]
+    return re.sub(r"\s+", " ", text)[:6000]
 
 
 def get_best_title_from_page(url):
@@ -145,25 +138,7 @@ def get_best_title_from_page(url):
             text = el.get_text(" ", strip=True)
             if text:
                 return text
-
     return ""
-
-
-def is_recent(text, days=120):
-    today = datetime.today()
-    limit = today - timedelta(days=days)
-
-    pattern = r"\b\d{2}/\d{2}/\d{4}\b"
-
-    for match in re.findall(pattern, text):
-        try:
-            d = datetime.strptime(match, "%d/%m/%Y")
-            if d >= limit:
-                return True
-        except Exception:
-            pass
-
-    return False
 
 
 def is_generic_bad_title(title):
@@ -277,6 +252,13 @@ def compute_score(item):
     return final_score, title_score, text_score, hits
 
 
+def same_domain(base_url, link):
+    try:
+        return urlparse(base_url).netloc == urlparse(link).netloc
+    except Exception:
+        return False
+
+
 def parse_html_list(source):
     soup = get_page(source["url"])
     if not soup:
@@ -284,8 +266,9 @@ def parse_html_list(source):
 
     results = []
     seen_links = set()
+    audit_mode = source["name"] == AUDIT_SOURCE
 
-    keywords = [
+    anchor_keywords = [
         "bando",
         "gara",
         "avviso",
@@ -301,19 +284,27 @@ def parse_html_list(source):
         "esperti",
     ]
 
+    url_hints = [
+        "/news",
+        "/notizie",
+        "/avvisi",
+        "/avviso",
+        "/bandi",
+        "/bando",
+        "/albo",
+        "type=3",
+        "id_sezione",
+    ]
+
+    count_candidates = 0
+
     for a in soup.find_all("a", href=True):
         href = a["href"].strip()
-        title = a.get_text(" ", strip=True)
+        raw_title = a.get_text(" ", strip=True)
 
         if not href:
             continue
-
-        if is_generic_bad_title(title):
-            continue
-
-        text = (title + " " + href).lower()
-
-        if not any(k in text for k in keywords):
+        if href.startswith("#") or href.startswith("javascript:") or href.startswith("mailto:"):
             continue
 
         link = urljoin(source["url"], href)
@@ -322,6 +313,33 @@ def parse_html_list(source):
             continue
         seen_links.add(link)
 
+        # Per i siti comunali normali, resta sullo stesso dominio
+        if source["type"] == "html_list" and not same_domain(source["url"], link):
+            if "unisa.it" not in link.lower():
+                continue
+
+        if is_generic_bad_title(raw_title):
+            continue
+
+        probe_text = (raw_title + " " + href).lower()
+
+        candidate = False
+
+        if any(k in probe_text for k in anchor_keywords):
+            candidate = True
+
+        if any(h in link.lower() for h in url_hints):
+            candidate = True
+
+        # in audit su San Cipriano allarghiamo moltissimo
+        if audit_mode and same_domain(source["url"], link):
+            if len(raw_title) >= 8:
+                candidate = True
+
+        if not candidate:
+            continue
+
+        # UNISA: mai pdf, solo pagina html del bando
         if "unisa.it" in source["url"].lower() or "università di salerno" in source["name"].lower():
             if link.lower().endswith(".pdf"):
                 continue
@@ -329,7 +347,14 @@ def parse_html_list(source):
                 continue
 
         page_text = get_page_text(link)
-        best_title = title if title else get_best_title_from_page(link)
+        best_title = raw_title if raw_title else get_best_title_from_page(link)
+
+        # secondo filtro sul contenuto pagina
+        page_probe = (best_title + " " + page_text[:3000]).lower()
+
+        if not audit_mode:
+            if not any(k in page_probe for k in anchor_keywords):
+                continue
 
         results.append(
             {
@@ -339,6 +364,10 @@ def parse_html_list(source):
                 "text": page_text,
             }
         )
+
+        count_candidates += 1
+        if audit_mode and count_candidates >= AUDIT_LIMIT:
+            break
 
     return results
 
@@ -371,15 +400,13 @@ def parse_traspare(source):
         if not page_text:
             continue
 
-        if not is_recent(page_text):
-            continue
-
         if not title or len(title) < 8:
             title = page_text[:200]
 
         if is_generic_bad_title(title):
             continue
 
+        # NIENTE più filtro is_recent: tagliava occasioni utili
         results.append(
             {
                 "source": source["name"],
