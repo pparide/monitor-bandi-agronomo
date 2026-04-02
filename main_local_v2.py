@@ -3,7 +3,7 @@ import os
 import re
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin, urlparse, parse_qs
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -159,7 +159,12 @@ def is_generic_bad_title(title):
         "vivere il comune",
         "tutti gli argomenti",
         "tutti gli eventi",
+        "avvisi",
+        "comunicati",
     ]
+
+    if t.isdigit():
+        return True
 
     return t in bad_titles
 
@@ -264,13 +269,38 @@ def same_domain(base_url, link):
         return False
 
 
+def is_listing_page(link):
+    parsed = urlparse(link)
+    path = parsed.path.lower()
+    query = parse_qs(parsed.query)
+
+    if "paged" in query:
+        return True
+
+    listing_paths = [
+        "/notizie/avvisi",
+        "/notizie/comunicati",
+        "/it/news",
+        "/news",
+        "/avvisi",
+        "/bandi",
+    ]
+
+    return any(path.rstrip("/").endswith(lp) for lp in listing_paths)
+
+
 def path_looks_like_detail(link):
-    path = urlparse(link).path.lower()
+    parsed = urlparse(link)
+    path = parsed.path.lower()
+    query = parse_qs(parsed.query)
+
+    if "paged" in query:
+        return False
 
     good = [
-        "/notizie/",
+        "/novita/",
         "/news/",
-        "/avvisi/",
+        "/notizie/",
         "/avviso/",
         "/bando/",
         "/bandi/",
@@ -286,15 +316,72 @@ def path_looks_like_detail(link):
         "/vivere-il-comune/",
         "/domande-frequenti/",
         "/notizie/page/",
+        "/notizie/avvisi",
+        "/notizie/comunicati",
     ]
 
     if any(b in path for b in bad):
         return False
 
-    if any(g in path for g in good):
-        return True
+    return any(g in path for g in good)
 
-    return False
+
+def extract_detail_links_from_listing(listing_url, base_source_url):
+    soup = get_page(listing_url)
+    if not soup:
+        return []
+
+    found = []
+    seen = set()
+
+    anchor_keywords = [
+        "bando",
+        "gara",
+        "avviso",
+        "manifestazione",
+        "incarico",
+        "affidamento",
+        "vinca",
+        "valutazione di incidenza",
+        "paesaggio",
+        "paesaggistica",
+        "commissione",
+        "nomina",
+        "esperti",
+    ]
+
+    for a in soup.find_all("a", href=True):
+        href = a["href"].strip()
+        raw_title = a.get_text(" ", strip=True)
+
+        if not href:
+            continue
+        if href.startswith("#") or href.startswith("javascript:") or href.startswith("mailto:"):
+            continue
+
+        link = urljoin(listing_url, href)
+
+        if not same_domain(base_source_url, link):
+            continue
+
+        if link in seen:
+            continue
+        seen.add(link)
+
+        if is_listing_page(link):
+            continue
+
+        if is_generic_bad_title(raw_title):
+            continue
+
+        probe_text = (raw_title + " " + href).lower()
+
+        if not path_looks_like_detail(link) and not any(k in probe_text for k in anchor_keywords):
+            continue
+
+        found.append((link, raw_title))
+
+    return found
 
 
 def parse_html_list(source):
@@ -322,6 +409,8 @@ def parse_html_list(source):
         "esperti",
     ]
 
+    candidate_links = []
+
     for a in soup.find_all("a", href=True):
         href = a["href"].strip()
         raw_title = a.get_text(" ", strip=True)
@@ -337,7 +426,7 @@ def parse_html_list(source):
             continue
         seen_links.add(link)
 
-        if source["type"] == "html_list" and not same_domain(source["url"], link):
+        if not same_domain(source["url"], link):
             if "unisa.it" not in link.lower():
                 continue
 
@@ -347,16 +436,33 @@ def parse_html_list(source):
         probe_text = (raw_title + " " + href).lower()
 
         candidate = False
-
         if any(k in probe_text for k in anchor_keywords):
             candidate = True
-
         if path_looks_like_detail(link):
+            candidate = True
+        if is_listing_page(link):
             candidate = True
 
         if not candidate:
             continue
 
+        candidate_links.append((link, raw_title))
+
+    expanded_links = []
+    seen_expanded = set()
+
+    for link, raw_title in candidate_links:
+        if is_listing_page(link):
+            for detail_link, detail_title in extract_detail_links_from_listing(link, source["url"]):
+                if detail_link not in seen_expanded:
+                    expanded_links.append((detail_link, detail_title))
+                    seen_expanded.add(detail_link)
+        else:
+            if link not in seen_expanded:
+                expanded_links.append((link, raw_title))
+                seen_expanded.add(link)
+
+    for link, raw_title in expanded_links:
         if "unisa.it" in source["url"].lower() or "università di salerno" in source["name"].lower():
             if link.lower().endswith(".pdf"):
                 continue
