@@ -293,6 +293,13 @@ def parse_html_list(source):
         "manifestazione",
         "incarico",
         "affidamento",
+        "vinca",
+        "valutazione di incidenza",
+        "paesaggio",
+        "paesaggistica",
+        "commissione",
+        "nomina",
+        "esperti",
     ]
 
     for a in soup.find_all("a", href=True):
