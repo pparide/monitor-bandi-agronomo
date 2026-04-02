@@ -17,7 +17,7 @@ EMAIL_TO = os.environ["EMAIL_TO"]
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 AUDIT_SOURCE = "Comune di San Cipriano Picentino Avvisi"
-AUDIT_LIMIT = 25
+AUDIT_LIMIT = 40
 
 
 def load_json(path, default):
@@ -329,13 +329,11 @@ def path_looks_like_detail(link):
     return any(g in path for g in good)
 
 
-def extract_detail_links_from_listing(listing_url, base_source_url):
-    soup = get_page(listing_url)
-    if not soup:
-        return []
-
+def extract_detail_links_from_listing(listing_url, base_source_url, max_pages=4):
+    queue = [listing_url]
+    visited_listings = set()
     found = []
-    seen = set()
+    seen_details = set()
 
     anchor_keywords = [
         "bando",
@@ -353,36 +351,47 @@ def extract_detail_links_from_listing(listing_url, base_source_url):
         "esperti",
     ]
 
-    for a in soup.find_all("a", href=True):
-        href = a["href"].strip()
-        raw_title = a.get_text(" ", strip=True)
-
-        if not href:
+    while queue and len(visited_listings) < max_pages:
+        current = queue.pop(0)
+        if current in visited_listings:
             continue
-        if href.startswith("#") or href.startswith("javascript:") or href.startswith("mailto:"):
-            continue
+        visited_listings.add(current)
 
-        link = urljoin(listing_url, href)
-
-        if not same_domain(base_source_url, link):
+        soup = get_page(current)
+        if not soup:
             continue
 
-        if link in seen:
-            continue
-        seen.add(link)
+        for a in soup.find_all("a", href=True):
+            href = a["href"].strip()
+            raw_title = a.get_text(" ", strip=True)
 
-        if is_listing_page(link):
-            continue
+            if not href:
+                continue
+            if href.startswith("#") or href.startswith("javascript:") or href.startswith("mailto:"):
+                continue
 
-        if is_generic_bad_title(raw_title):
-            continue
+            link = urljoin(current, href)
 
-        probe_text = (raw_title + " " + href).lower()
+            if not same_domain(base_source_url, link):
+                continue
 
-        if not path_looks_like_detail(link) and not any(k in probe_text for k in anchor_keywords):
-            continue
+            if is_listing_page(link):
+                if link not in visited_listings and link not in queue:
+                    queue.append(link)
+                continue
 
-        found.append((link, raw_title))
+            if is_generic_bad_title(raw_title):
+                continue
+
+            probe_text = (raw_title + " " + href).lower()
+
+            if not path_looks_like_detail(link) and not any(k in probe_text for k in anchor_keywords):
+                continue
+
+            if link in seen_details:
+                continue
+            seen_details.add(link)
+            found.append((link, raw_title))
 
     return found
 
@@ -419,7 +428,7 @@ def extract_card_links_from_homepage(home_url):
         chosen_link = None
         chosen_title = text
 
-        for _ in range(5):
+        for _ in range(6):
             if parent is None:
                 break
 
@@ -437,7 +446,9 @@ def extract_card_links_from_homepage(home_url):
                     continue
                 if is_listing_page(link):
                     continue
-                if "/novita/" not in urlparse(link).path.lower() and "/notizie/" not in urlparse(link).path.lower():
+
+                path = urlparse(link).path.lower()
+                if "/novita/" not in path and "/notizie/" not in path:
                     continue
 
                 chosen_link = link
@@ -522,7 +533,6 @@ def parse_html_list(source):
 
         candidate_links.append((link, raw_title))
 
-    # Per la home di San Cipriano prova anche a ricostruire i link dalle card
     if source["name"] == "Comune di San Cipriano Picentino Home":
         for link, title in extract_card_links_from_homepage(source["url"]):
             if link not in {x[0] for x in candidate_links}:
