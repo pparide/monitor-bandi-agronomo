@@ -63,7 +63,6 @@ def normalize_sources(data):
 def normalize_seen(data):
     if not isinstance(data, list):
         return []
-
     return [x.strip() for x in data if isinstance(x, str) and x.strip()]
 
 
@@ -114,12 +113,58 @@ def get_page(url):
         return None
 
 
+def clean_text(text, max_len=6000):
+    text = re.sub(r"\s+", " ", text).strip()
+    return text[:max_len]
+
+
+def extract_meaningful_text_from_soup(soup):
+    if not soup:
+        return ""
+
+    soup = BeautifulSoup(str(soup), "html.parser")
+
+    for tag in soup.find_all(["script", "style", "noscript", "nav", "footer", "aside", "header", "form"]):
+        tag.decompose()
+
+    priority_selectors = [
+        "article",
+        "main",
+        '[role="main"]',
+        ".entry-content",
+        ".post-content",
+        ".news-content",
+        ".article-content",
+        ".content",
+        ".content-body",
+        ".field-content",
+        ".node__content",
+        ".page-content",
+        ".detail-content"
+    ]
+
+    chunks = []
+
+    for selector in priority_selectors:
+        for el in soup.select(selector):
+            txt = clean_text(el.get_text(" ", strip=True), max_len=4000)
+            if len(txt) >= 200:
+                chunks.append(txt)
+
+    if chunks:
+        merged = " ".join(chunks)
+        return clean_text(merged, max_len=6000)
+
+    body = soup.body if soup.body else soup
+    txt = clean_text(body.get_text(" ", strip=True), max_len=6000)
+    return txt
+
+
 def get_page_text(url):
     soup = get_page(url)
     if not soup:
         return ""
-    text = soup.get_text(" ", strip=True)
-    return re.sub(r"\s+", " ", text)[:6000]
+    return extract_meaningful_text_from_soup(soup)
 
 
 def get_best_title_from_page(url):
