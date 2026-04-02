@@ -215,6 +215,7 @@ def keyword_score(text):
     text = text.lower()
 
     positive = {
+        "avviso pubblico": 2,
         "agronom": 5,
         "forest": 5,
         "verde": 4,
@@ -273,11 +274,10 @@ def keyword_score(text):
         "beni culturali": -4,
         "lighting design": -6,
         "lightning design": -6,
-        "alloggi": -8,
-        "abitativ": -8,
-        "inquilin": -8,
-        "morosi": -8,
-        "erp": -8
+        "alloggi erp": -10,
+        "edilizia residenziale pubblica": -10,
+        "emergenza abitativa": -10,
+        "inquilini morosi": -10
     }
 
     score = 0
