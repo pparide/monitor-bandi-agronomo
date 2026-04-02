@@ -473,7 +473,7 @@ def main():
             item["text_score"] = text_score
             item["hits"] = hits
 
-            if score < 8:
+            if score < 7:
                 discarded_low_score += 1
 
                 if item["source"] == AUDIT_SOURCE and len(audit_discarded) < AUDIT_LIMIT:
