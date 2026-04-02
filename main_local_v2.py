@@ -16,8 +16,8 @@ EMAIL_TO = os.environ["EMAIL_TO"]
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
-AUDIT_SOURCE = "Comune di Mercato San Severino"
-AUDIT_LIMIT = 50
+AUDIT_SOURCE = "Comune di Salerno"
+AUDIT_LIMIT = 60
 
 
 def load_json(path, default):
@@ -140,7 +140,9 @@ def extract_meaningful_text_from_soup(soup):
         ".field-content",
         ".node__content",
         ".page-content",
-        ".detail-content"
+        ".detail-content",
+        "#content",
+        "#main"
     ]
 
     chunks = []
@@ -202,7 +204,10 @@ def is_generic_bad_title(title):
         "avvisi",
         "comunicati",
         "notizie",
-        "servizi"
+        "servizi",
+        "dettaglio",
+        "apri",
+        "visualizza"
     ]
 
     if t.isdigit():
@@ -682,43 +687,13 @@ def parse_portale_appalti(source):
     results = []
     seen_links = set()
 
-    keywords = [
-        "bando",
-        "gara",
-        "avviso",
-        "procedura",
-        "affidamento",
-        "manifestazione",
-    ]
-
-    bad_fragments = [
-        "home",
-        "pagina iniziale",
-        "accedi",
-        "login",
-        "profilo",
-        "contatti",
-        "faq",
-        "help",
-        "manuale",
-    ]
-
     for a in soup.find_all("a", href=True):
         href = a["href"].strip()
         title = a.get_text(" ", strip=True)
 
         if not href:
             continue
-
-        text = (title + " " + href).lower()
-
-        if not any(k in text for k in keywords):
-            continue
-
-        if any(k in text for k in bad_fragments):
-            continue
-
-        if is_generic_bad_title(title):
+        if href.startswith("#") or href.startswith("javascript:") or href.startswith("mailto:"):
             continue
 
         link = urljoin(source["url"], href)
@@ -726,6 +701,23 @@ def parse_portale_appalti(source):
         if link in seen_links:
             continue
         seen_links.add(link)
+
+        text = (title + " " + href).lower()
+        link_low = link.lower()
+
+        candidate = False
+
+        if any(k in text for k in ["bando", "gara", "avviso", "procedura", "affidamento", "manifestazione"]):
+            candidate = True
+
+        if any(k in link_low for k in ["gara", "bando", "procedura", "visualizza", "dettaglio", "scheda"]):
+            candidate = True
+
+        if not candidate:
+            continue
+
+        if any(k in text for k in ["home", "pagina iniziale", "accedi", "login", "profilo", "contatti", "faq", "help", "manuale"]):
+            continue
 
         page_text = get_page_text(link)
         best_title = title if title else get_best_title_from_page(link)
@@ -738,6 +730,9 @@ def parse_portale_appalti(source):
                 "text": page_text,
             }
         )
+
+        if source["name"] == AUDIT_SOURCE and len(results) >= AUDIT_LIMIT:
+            break
 
     return results
 
