@@ -17,8 +17,9 @@ EMAIL_TO = os.environ["EMAIL_TO"]
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
-AUDIT_SOURCE = "Comune di Salerno"
-AUDIT_LIMIT = 10
+# fonte da auditare in dettaglio
+AUDIT_SOURCE = "Comune di San Cipriano Picentino"
+AUDIT_LIMIT = 20
 
 
 def load_json(path, default):
@@ -461,7 +462,7 @@ def parse_portale_appalti(source):
 
 def main():
     debug = []
-    audit_discarded = []
+    audit_candidates = []
 
     try:
         manual_sources = normalize_sources(load_json("sources.json", []))
@@ -541,20 +542,31 @@ def main():
             item["text_score"] = text_score
             item["hits"] = hits
 
+            if item["source"] == AUDIT_SOURCE and len(audit_candidates) < AUDIT_LIMIT:
+                reason = "TENUTO"
+                if score < 7:
+                    reason = "SCARTATO_PER_SCORE"
+                else:
+                    key = item.get("seen_key", item["link"])
+                    if key in seen_keys_run:
+                        reason = "SCARTATO_DUPLICATO_RUN"
+                    elif key in seen:
+                        reason = "SCARTATO_GIA_VISTO"
+
+                audit_candidates.append(
+                    {
+                        "title": item["title"],
+                        "link": item["link"],
+                        "score": score,
+                        "title_score": title_score,
+                        "text_score": text_score,
+                        "hits": hits,
+                        "reason": reason,
+                    }
+                )
+
             if score < 7:
                 discarded_low_score += 1
-
-                if item["source"] == AUDIT_SOURCE and len(audit_discarded) < AUDIT_LIMIT:
-                    audit_discarded.append(
-                        {
-                            "title": item["title"],
-                            "link": item["link"],
-                            "score": score,
-                            "title_score": title_score,
-                            "text_score": text_score,
-                            "hits": hits,
-                        }
-                    )
                 continue
 
             key = item.get("seen_key", item["link"])
@@ -616,12 +628,13 @@ def main():
                     f"{item['link']}\n\n"
                 )
 
-        if audit_discarded:
-            body += f"\nAUDIT RISULTATI SCARTATI – {AUDIT_SOURCE}\n\n"
+        if audit_candidates:
+            body += f"\nAUDIT CANDIDATI – {AUDIT_SOURCE}\n\n"
 
-            for item in audit_discarded:
+            for item in audit_candidates:
                 body += (
                     f"{item['title']}\n"
+                    f"motivo: {item['reason']}\n"
                     f"title_score: {item['title_score']}\n"
                     f"text_score: {item['text_score']}\n"
                     f"score finale: {item['score']}\n"
