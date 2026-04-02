@@ -277,6 +277,9 @@ def is_listing_page(link):
     if "paged" in query:
         return True
 
+    if re.search(r"/page/\d+/?$", path):
+        return True
+
     listing_paths = [
         "/notizie/avvisi",
         "/notizie/comunicati",
@@ -384,6 +387,77 @@ def extract_detail_links_from_listing(listing_url, base_source_url):
     return found
 
 
+def extract_card_links_from_homepage(home_url):
+    soup = get_page(home_url)
+    if not soup:
+        return []
+
+    found = []
+    seen = set()
+
+    strong_keywords = [
+        "vinca",
+        "valutazione di incidenza",
+        "commissione locale per il paesaggio",
+        "commissione paesaggio",
+        "paesaggistica",
+        "nomina componenti",
+        "commissione esperti",
+    ]
+
+    text_nodes = soup.find_all(["h2", "h3", "h4", "p", "span", "strong", "a"])
+    for node in text_nodes:
+        text = node.get_text(" ", strip=True)
+        if not text:
+            continue
+
+        low = text.lower()
+        if not any(k in low for k in strong_keywords):
+            continue
+
+        parent = node
+        chosen_link = None
+        chosen_title = text
+
+        for _ in range(5):
+            if parent is None:
+                break
+
+            links = parent.find_all("a", href=True)
+            for a in links:
+                href = a["href"].strip()
+                if not href:
+                    continue
+                if href.startswith("#") or href.startswith("javascript:") or href.startswith("mailto:"):
+                    continue
+
+                link = urljoin(home_url, href)
+
+                if not same_domain(home_url, link):
+                    continue
+                if is_listing_page(link):
+                    continue
+                if "/novita/" not in urlparse(link).path.lower() and "/notizie/" not in urlparse(link).path.lower():
+                    continue
+
+                chosen_link = link
+                anchor_text = a.get_text(" ", strip=True)
+                if anchor_text and anchor_text.lower() not in ["vai alla pagina", "leggi tutto"]:
+                    chosen_title = anchor_text
+                break
+
+            if chosen_link:
+                break
+
+            parent = parent.parent
+
+        if chosen_link and chosen_link not in seen:
+            seen.add(chosen_link)
+            found.append((chosen_link, chosen_title))
+
+    return found
+
+
 def parse_html_list(source):
     soup = get_page(source["url"])
     if not soup:
@@ -447,6 +521,12 @@ def parse_html_list(source):
             continue
 
         candidate_links.append((link, raw_title))
+
+    # Per la home di San Cipriano prova anche a ricostruire i link dalle card
+    if source["name"] == "Comune di San Cipriano Picentino Home":
+        for link, title in extract_card_links_from_homepage(source["url"]):
+            if link not in {x[0] for x in candidate_links}:
+                candidate_links.append((link, title))
 
     expanded_links = []
     seen_expanded = set()
