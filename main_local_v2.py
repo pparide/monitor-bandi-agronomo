@@ -16,7 +16,7 @@ EMAIL_TO = os.environ["EMAIL_TO"]
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
-AUDIT_SOURCE = "Comune di San Cipriano Picentino"
+AUDIT_SOURCE = "Comune di San Cipriano Picentino Avvisi"
 AUDIT_LIMIT = 25
 
 
@@ -123,7 +123,6 @@ def get_page_text(url):
     soup = get_page(url)
     if not soup:
         return ""
-
     text = soup.get_text(" ", strip=True)
     return re.sub(r"\s+", " ", text)[:6000]
 
@@ -355,7 +354,6 @@ def parse_html_list(source):
         if path_looks_like_detail(link):
             candidate = True
 
-        # su San Cipriano NON allargare più a tutto il dominio
         if not candidate:
             continue
 
