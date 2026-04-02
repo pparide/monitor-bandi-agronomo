@@ -17,7 +17,7 @@ EMAIL_TO = os.environ["EMAIL_TO"]
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 AUDIT_SOURCE = "Comune di Salerno"
-AUDIT_LIMIT = 60
+AUDIT_LIMIT = 120
 
 
 def load_json(path, default):
@@ -685,7 +685,7 @@ def parse_portale_appalti(source):
         return []
 
     results = []
-    seen_links = set()
+    audit_raw = []
 
     for a in soup.find_all("a", href=True):
         href = a["href"].strip()
@@ -698,9 +698,15 @@ def parse_portale_appalti(source):
 
         link = urljoin(source["url"], href)
 
-        if link in seen_links:
-            continue
-        seen_links.add(link)
+        if source["name"] == AUDIT_SOURCE and len(audit_raw) < AUDIT_LIMIT:
+            audit_raw.append(
+                {
+                    "source": source["name"],
+                    "title": title if title else "(senza titolo)",
+                    "link": link,
+                    "text": ""
+                }
+            )
 
         text = (title + " " + href).lower()
         link_low = link.lower()
@@ -710,7 +716,7 @@ def parse_portale_appalti(source):
         if any(k in text for k in ["bando", "gara", "avviso", "procedura", "affidamento", "manifestazione"]):
             candidate = True
 
-        if any(k in link_low for k in ["gara", "bando", "procedura", "visualizza", "dettaglio", "scheda"]):
+        if any(k in link_low for k in ["gara", "bando", "procedura", "visualizza", "dettaglio", "scheda", "ppgare"]):
             candidate = True
 
         if not candidate:
@@ -733,6 +739,9 @@ def parse_portale_appalti(source):
 
         if source["name"] == AUDIT_SOURCE and len(results) >= AUDIT_LIMIT:
             break
+
+    if source["name"] == AUDIT_SOURCE and not results:
+        return audit_raw
 
     return results
 
