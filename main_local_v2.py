@@ -16,8 +16,14 @@ EMAIL_TO = os.environ["EMAIL_TO"]
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
-AUDIT_SOURCE = "Comune di Mercato San Severino"
-AUDIT_LIMIT = 50
+# Modalità silenziosa:
+# - False = nessuna mail quando non ci sono novità
+# - True  = manda comunque mail di debug
+SEND_DEBUG_WHEN_EMPTY = False
+
+# Audit disattivato in pratica
+AUDIT_SOURCE = ""
+AUDIT_LIMIT = 0
 
 
 def load_json(path, default):
@@ -595,7 +601,7 @@ def parse_html_list(source):
 
     results = []
     seen_links = set()
-    audit_mode = source["name"] == AUDIT_SOURCE
+    audit_mode = source["name"] == AUDIT_SOURCE and AUDIT_LIMIT > 0
 
     anchor_keywords = [
         "bando",
@@ -822,9 +828,6 @@ def parse_portale_appalti(source):
             }
         )
 
-        if source["name"] == AUDIT_SOURCE and len(results) >= AUDIT_LIMIT:
-            break
-
     return results
 
 
@@ -908,7 +911,7 @@ def main():
             item["text_score"] = text_score
             item["hits"] = hits
 
-            if item["source"] == AUDIT_SOURCE and len(audit_candidates) < AUDIT_LIMIT:
+            if AUDIT_SOURCE and item["source"] == AUDIT_SOURCE and len(audit_candidates) < AUDIT_LIMIT:
                 reason = "TENUTO"
                 if score < 7:
                     reason = "SCARTATO_PER_SCORE"
@@ -961,54 +964,42 @@ def main():
         save_json("seen.json", seen)
         save_json("source_health.json", health)
 
-        debug.append("seen.json salvato")
-        debug.append("source_health.json salvato")
-        debug.append("")
-        debug.append("STATISTICHE FONTI")
-
-        for name, data in health.items():
-            line = (
-                f"{name} | "
-                f"runs={data.get('runs', 0)} "
-                f"results={data.get('results', 0)} "
-                f"relevant={data.get('relevant', 0)} "
-                f"zero_runs={data.get('zero_runs', 0)}"
-            )
-            debug.append(line)
-
         if not new_items:
-            subject = "Monitor bandi – debug"
-            body = "Nessun nuovo bando trovato.\n\n"
-        else:
-            subject = f"Monitor bandi – {len(new_items)} nuovi risultati"
-            body = "Monitor bandi – nuovi risultati\n\n"
+            if SEND_DEBUG_WHEN_EMPTY:
+                subject = "Monitor bandi – debug"
+                body = "Nessun nuovo bando trovato.\n\nDEBUG\n\n" + "\n".join(debug)
 
-            for item in new_items:
-                body += (
-                    f"{item['source']}\n"
-                    f"{item['title']}\n"
-                    f"title_score: {item['title_score']}\n"
-                    f"text_score: {item['text_score']}\n"
-                    f"score finale: {item['score']}\n"
-                    f"match: {', '.join(item['hits'])}\n"
-                    f"{item['link']}\n\n"
-                )
+                if audit_candidates:
+                    body += f"\n\nAUDIT CANDIDATI – {AUDIT_SOURCE}\n\n"
+                    for item in audit_candidates:
+                        body += (
+                            f"{item['title']}\n"
+                            f"motivo: {item['reason']}\n"
+                            f"title_score: {item['title_score']}\n"
+                            f"text_score: {item['text_score']}\n"
+                            f"score finale: {item['score']}\n"
+                            f"match: {', '.join(item['hits'])}\n"
+                            f"{item['link']}\n\n"
+                        )
 
-        if audit_candidates:
-            body += f"\nAUDIT CANDIDATI – {AUDIT_SOURCE}\n\n"
+                send_email(subject, body)
 
-            for item in audit_candidates:
-                body += (
-                    f"{item['title']}\n"
-                    f"motivo: {item['reason']}\n"
-                    f"title_score: {item['title_score']}\n"
-                    f"text_score: {item['text_score']}\n"
-                    f"score finale: {item['score']}\n"
-                    f"match: {', '.join(item['hits'])}\n"
-                    f"{item['link']}\n\n"
-                )
+            return
 
-        body += "\nDEBUG\n\n" + "\n".join(debug)
+        subject = f"Monitor bandi – {len(new_items)} nuovi risultati"
+        body = "Monitor bandi – nuovi risultati\n\n"
+
+        for item in new_items:
+            body += (
+                f"{item['source']}\n"
+                f"{item['title']}\n"
+                f"title_score: {item['title_score']}\n"
+                f"text_score: {item['text_score']}\n"
+                f"score finale: {item['score']}\n"
+                f"match: {', '.join(item['hits'])}\n"
+                f"{item['link']}\n\n"
+            )
+
         send_email(subject, body)
 
     except Exception as e:
