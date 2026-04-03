@@ -146,7 +146,8 @@ def extract_meaningful_text_from_soup(soup):
         ".box-content",
         ".contenuto",
         ".dettaglio",
-        ".scheda"
+        ".scheda",
+        "table"
     ]
 
     chunks = []
@@ -154,7 +155,7 @@ def extract_meaningful_text_from_soup(soup):
     for selector in priority_selectors:
         for el in soup.select(selector):
             txt = clean_text(el.get_text(" ", strip=True), max_len=5000)
-            if len(txt) >= 120:
+            if len(txt) >= 80:
                 chunks.append(txt)
 
     if chunks:
@@ -187,6 +188,68 @@ def get_best_title_from_page(url):
     return ""
 
 
+def extract_salerno_portal_title_and_text(url):
+    soup = get_page(url)
+    if not soup:
+        return "", ""
+
+    label_candidates = [
+        "oggetto",
+        "titolo",
+        "descrizione",
+        "oggetto della procedura",
+        "denominazione",
+        "procedura",
+        "cig",
+        "cup"
+    ]
+
+    # 1) prova su tabelle th/td
+    for tr in soup.find_all("tr"):
+        headers = tr.find_all(["th", "td"])
+        if len(headers) < 2:
+            continue
+
+        left = headers[0].get_text(" ", strip=True).lower()
+        right = headers[1].get_text(" ", strip=True)
+
+        if any(label in left for label in label_candidates) and right:
+            if len(right) > 15:
+                page_text = extract_meaningful_text_from_soup(soup)
+                return right, page_text
+
+    # 2) prova su dt/dd
+    dts = soup.find_all("dt")
+    for dt in dts:
+        label = dt.get_text(" ", strip=True).lower()
+        dd = dt.find_next_sibling("dd")
+        if dd and any(l in label for l in label_candidates):
+            value = dd.get_text(" ", strip=True)
+            if len(value) > 15:
+                page_text = extract_meaningful_text_from_soup(soup)
+                return value, page_text
+
+    # 3) prova blocchi label:value nel testo
+    page_text = extract_meaningful_text_from_soup(soup)
+    patterns = [
+        r"Oggetto\s*[:\-]\s*(.+?)(?:CIG|CUP|Importo|Scadenza|$)",
+        r"Titolo\s*[:\-]\s*(.+?)(?:CIG|CUP|Importo|Scadenza|$)",
+        r"Descrizione\s*[:\-]\s*(.+?)(?:CIG|CUP|Importo|Scadenza|$)",
+        r"Denominazione\s*[:\-]\s*(.+?)(?:CIG|CUP|Importo|Scadenza|$)"
+    ]
+
+    for pattern in patterns:
+        m = re.search(pattern, page_text, flags=re.IGNORECASE | re.DOTALL)
+        if m:
+            title = clean_text(m.group(1), max_len=300)
+            if len(title) > 15:
+                return title, page_text
+
+    # 4) fallback
+    best_title = get_best_title_from_page(url)
+    return best_title, page_text
+
+
 def is_generic_bad_title(title):
     t = title.strip().lower()
 
@@ -216,7 +279,8 @@ def is_generic_bad_title(title):
         "grafica",
         "testo",
         "alto contrasto",
-        "a"
+        "a",
+        "sezione data e ora ufficiale:"
     ]
 
     if t.isdigit():
@@ -266,7 +330,7 @@ def keyword_score(text):
         "esperti ambientali": 5,
         "esperti in materia ambientale": 6,
         "componente esperto": 5,
-        "nomina componenti": 5,
+        "nomina componenti": 5
     }
 
     negative = {
@@ -753,9 +817,8 @@ def parse_portale_appalti(source):
         if not is_real_detail:
             continue
 
-        page_text = get_page_text(link)
-        best_title = get_best_title_from_page(link)
-        final_title = best_title if best_title else raw_title if raw_title else "Procedura di gara"
+        salerno_title, page_text = extract_salerno_portal_title_and_text(link)
+        final_title = salerno_title if salerno_title else raw_title if raw_title else "Procedura di gara"
 
         results.append(
             {
