@@ -205,29 +205,27 @@ def extract_salerno_portal_title_and_text(url):
     ]
 
     for tr in soup.find_all("tr"):
-        headers = tr.find_all(["th", "td"])
-        if len(headers) < 2:
+        cells = tr.find_all(["th", "td"])
+        if len(cells) < 2:
             continue
 
-        left = headers[0].get_text(" ", strip=True).lower()
-        right = headers[1].get_text(" ", strip=True)
+        left = cells[0].get_text(" ", strip=True).lower()
+        right = cells[1].get_text(" ", strip=True)
 
-        if any(label in left for label in label_candidates) and right:
-            if len(right) > 15:
-                page_text = extract_meaningful_text_from_soup(soup)
-                return right, page_text
+        if any(label in left for label in label_candidates) and len(right) > 15:
+            return right, extract_meaningful_text_from_soup(soup)
 
     dts = soup.find_all("dt")
     for dt in dts:
         label = dt.get_text(" ", strip=True).lower()
         dd = dt.find_next_sibling("dd")
-        if dd and any(l in label for l in label_candidates):
+        if dd and any(label_name in label for label_name in label_candidates):
             value = dd.get_text(" ", strip=True)
             if len(value) > 15:
-                page_text = extract_meaningful_text_from_soup(soup)
-                return value, page_text
+                return value, extract_meaningful_text_from_soup(soup)
 
     page_text = extract_meaningful_text_from_soup(soup)
+
     patterns = [
         r"Oggetto\s*[:\-]\s*(.+?)(?:CIG|CUP|Importo|Scadenza|$)",
         r"Titolo\s*[:\-]\s*(.+?)(?:CIG|CUP|Importo|Scadenza|$)",
@@ -809,7 +807,6 @@ def parse_portale_appalti(source):
             continue
 
         is_real_detail = "view.action" in link_low and "codice=" in link_low
-
         if not is_real_detail:
             continue
 
