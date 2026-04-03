@@ -17,7 +17,7 @@ EMAIL_TO = os.environ["EMAIL_TO"]
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 AUDIT_SOURCE = "Comune di Salerno"
-AUDIT_LIMIT = 120
+AUDIT_LIMIT = 60
 
 
 def load_json(path, default):
@@ -142,15 +142,19 @@ def extract_meaningful_text_from_soup(soup):
         ".page-content",
         ".detail-content",
         "#content",
-        "#main"
+        "#main",
+        ".box-content",
+        ".contenuto",
+        ".dettaglio",
+        ".scheda"
     ]
 
     chunks = []
 
     for selector in priority_selectors:
         for el in soup.select(selector):
-            txt = clean_text(el.get_text(" ", strip=True), max_len=4000)
-            if len(txt) >= 200:
+            txt = clean_text(el.get_text(" ", strip=True), max_len=5000)
+            if len(txt) >= 120:
                 chunks.append(txt)
 
     if chunks:
@@ -207,7 +211,12 @@ def is_generic_bad_title(title):
         "servizi",
         "dettaglio",
         "apri",
-        "visualizza"
+        "visualizza",
+        "visualizza scheda",
+        "grafica",
+        "testo",
+        "alto contrasto",
+        "a"
     ]
 
     if t.isdigit():
@@ -685,53 +694,73 @@ def parse_portale_appalti(source):
         return []
 
     results = []
-    audit_raw = []
+    seen_links = set()
+
+    strict_bad_titles = {
+        "vai alla pagina di aiuto alla navigazione",
+        "passa al testo con caratteri di dimensione standard",
+        "passa al testo con caratteri di dimensione grande",
+        "passa al testo con caratteri di dimensione molto grande",
+        "passa alla visualizzazione grafica",
+        "passa alla visualizzazione solo testo",
+        "passa alla visualizzazione in alto contrasto e solo testo",
+        "grafica",
+        "testo",
+        "alto contrasto",
+        "a",
+        "istruzioni e manuali",
+        "assistenza operatori economici",
+        "news",
+        "accessibilità",
+        "credits",
+        "cookies",
+        "gare e procedure",
+        "avvisi pubblici",
+        "avvisi di aggiudicazione, esiti e affidamenti",
+        "bandi e avvisi d'iscrizione",
+        "bandi e avvisi d'iscrizione archiviati",
+        "esiti affidamenti",
+        "riepilogo contratti - link bdncp",
+        "prospetti annuali (art. 1 c. 32 l.190 del 6/11/2012)",
+        "delibere a contrarre o atto equivalente",
+        "varianti in corso d'opera",
+        "avvisi di avvio consultazione",
+        "avvisi, comunicazioni e atti di carattere generale"
+    }
 
     for a in soup.find_all("a", href=True):
         href = a["href"].strip()
-        title = a.get_text(" ", strip=True)
+        raw_title = a.get_text(" ", strip=True)
 
         if not href:
             continue
         if href.startswith("#") or href.startswith("javascript:") or href.startswith("mailto:"):
             continue
 
+        title_low = raw_title.strip().lower()
         link = urljoin(source["url"], href)
-
-        if source["name"] == AUDIT_SOURCE and len(audit_raw) < AUDIT_LIMIT:
-            audit_raw.append(
-                {
-                    "source": source["name"],
-                    "title": title if title else "(senza titolo)",
-                    "link": link,
-                    "text": ""
-                }
-            )
-
-        text = (title + " " + href).lower()
         link_low = link.lower()
 
-        candidate = False
+        if link in seen_links:
+            continue
+        seen_links.add(link)
 
-        if any(k in text for k in ["bando", "gara", "avviso", "procedura", "affidamento", "manifestazione"]):
-            candidate = True
-
-        if any(k in link_low for k in ["gara", "bando", "procedura", "visualizza", "dettaglio", "scheda", "ppgare"]):
-            candidate = True
-
-        if not candidate:
+        if title_low in strict_bad_titles:
             continue
 
-        if any(k in text for k in ["home", "pagina iniziale", "accedi", "login", "profilo", "contatti", "faq", "help", "manuale"]):
+        is_real_detail = "view.action" in link_low and "codice=" in link_low
+
+        if not is_real_detail:
             continue
 
         page_text = get_page_text(link)
-        best_title = title if title else get_best_title_from_page(link)
+        best_title = get_best_title_from_page(link)
+        final_title = best_title if best_title else raw_title if raw_title else "Procedura di gara"
 
         results.append(
             {
                 "source": source["name"],
-                "title": best_title if best_title else "Procedura di gara",
+                "title": final_title,
                 "link": link,
                 "text": page_text,
             }
@@ -739,9 +768,6 @@ def parse_portale_appalti(source):
 
         if source["name"] == AUDIT_SOURCE and len(results) >= AUDIT_LIMIT:
             break
-
-    if source["name"] == AUDIT_SOURCE and not results:
-        return audit_raw
 
     return results
 
