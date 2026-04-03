@@ -16,8 +16,8 @@ EMAIL_TO = os.environ["EMAIL_TO"]
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
-AUDIT_SOURCE = "Comune di Salerno"
-AUDIT_LIMIT = 60
+AUDIT_SOURCE = "Comune di Mercato San Severino"
+AUDIT_LIMIT = 50
 
 
 def load_json(path, default):
@@ -204,7 +204,6 @@ def extract_salerno_portal_title_and_text(url):
         "cup"
     ]
 
-    # 1) prova su tabelle th/td
     for tr in soup.find_all("tr"):
         headers = tr.find_all(["th", "td"])
         if len(headers) < 2:
@@ -218,7 +217,6 @@ def extract_salerno_portal_title_and_text(url):
                 page_text = extract_meaningful_text_from_soup(soup)
                 return right, page_text
 
-    # 2) prova su dt/dd
     dts = soup.find_all("dt")
     for dt in dts:
         label = dt.get_text(" ", strip=True).lower()
@@ -229,7 +227,6 @@ def extract_salerno_portal_title_and_text(url):
                 page_text = extract_meaningful_text_from_soup(soup)
                 return value, page_text
 
-    # 3) prova blocchi label:value nel testo
     page_text = extract_meaningful_text_from_soup(soup)
     patterns = [
         r"Oggetto\s*[:\-]\s*(.+?)(?:CIG|CUP|Importo|Scadenza|$)",
@@ -245,7 +242,6 @@ def extract_salerno_portal_title_and_text(url):
             if len(title) > 15:
                 return title, page_text
 
-    # 4) fallback
     best_title = get_best_title_from_page(url)
     return best_title, page_text
 
