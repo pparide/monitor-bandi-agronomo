@@ -1,176 +1,176 @@
 {
   "Comune di Pellezzano": {
-    "runs": 59,
-    "results": 463,
+    "runs": 60,
+    "results": 466,
     "relevant": 1,
-    "zero_runs": 1
+    "zero_runs": 0
   },
   "Comune di Salerno": {
-    "runs": 59,
+    "runs": 60,
     "results": 110,
     "relevant": 0,
-    "zero_runs": 18
+    "zero_runs": 19
   },
   "Provincia di Salerno": {
-    "runs": 59,
-    "results": 100,
+    "runs": 60,
+    "results": 105,
     "relevant": 0,
-    "zero_runs": 2
+    "zero_runs": 0
   },
   "Comune di Baronissi": {
-    "runs": 59,
+    "runs": 60,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 59
+    "zero_runs": 60
   },
   "Comune di Cava de' Tirreni": {
-    "runs": 59,
-    "results": 100,
+    "runs": 60,
+    "results": 105,
     "relevant": 2,
-    "zero_runs": 2
+    "zero_runs": 0
   },
   "Comune di Battipaglia": {
-    "runs": 59,
+    "runs": 60,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 59
+    "zero_runs": 60
   },
   "Comune di Eboli": {
-    "runs": 59,
+    "runs": 60,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 59
+    "zero_runs": 60
   },
   "Comune di Agropoli": {
-    "runs": 59,
+    "runs": 60,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 59
+    "zero_runs": 60
   },
   "Comune di Sapri": {
-    "runs": 59,
+    "runs": 60,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 59
+    "zero_runs": 60
   },
   "Parco Nazionale del Cilento": {
-    "runs": 59,
+    "runs": 60,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 59
+    "zero_runs": 60
   },
   "Regione Campania Agricoltura": {
-    "runs": 59,
+    "runs": 60,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 59
+    "zero_runs": 60
   },
   "Regione Campania Gare": {
-    "runs": 59,
+    "runs": 60,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 59
+    "zero_runs": 60
   },
   "Università di Salerno Collaborazioni": {
-    "runs": 59,
-    "results": 1094,
+    "runs": 60,
+    "results": 1118,
     "relevant": 1,
     "zero_runs": 0
   },
   "ASMECOMM Gare": {
-    "runs": 59,
-    "results": 59,
+    "runs": 60,
+    "results": 60,
     "relevant": 0,
     "zero_runs": 0
   },
   "Comune di San Cipriano Picentino Home": {
-    "runs": 59,
+    "runs": 60,
     "results": 57,
     "relevant": 2,
-    "zero_runs": 15
+    "zero_runs": 16
   },
   "Comune di San Cipriano Picentino Avvisi": {
-    "runs": 59,
-    "results": 295,
+    "runs": 60,
+    "results": 300,
     "relevant": 0,
     "zero_runs": 0
   },
   "Comune di San Cipriano Picentino Comunicati": {
-    "runs": 59,
-    "results": 236,
+    "runs": 60,
+    "results": 240,
     "relevant": 0,
     "zero_runs": 0
   },
   "Comune di Fisciano": {
-    "runs": 59,
+    "runs": 60,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 59
+    "zero_runs": 60
   },
   "Comune di Mercato San Severino": {
-    "runs": 59,
-    "results": 642,
+    "runs": 60,
+    "results": 656,
     "relevant": 1,
-    "zero_runs": 1
+    "zero_runs": 0
   },
   "Comune di Pontecagnano Faiano": {
-    "runs": 59,
+    "runs": 60,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 59
+    "zero_runs": 60
   },
   "Comune di Bonito": {
-    "runs": 59,
+    "runs": 60,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 59
+    "zero_runs": 60
   },
   "Comune di Cervinara": {
-    "runs": 59,
+    "runs": 60,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 59
+    "zero_runs": 60
   },
   "Comune di Flumeri": {
-    "runs": 59,
+    "runs": 60,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 59
+    "zero_runs": 60
   },
   "Comune di Fontanarosa": {
-    "runs": 59,
-    "results": 20,
+    "runs": 60,
+    "results": 21,
     "relevant": 0,
-    "zero_runs": 2
+    "zero_runs": 0
   },
   "Comune di Frigento": {
-    "runs": 59,
+    "runs": 60,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 59
+    "zero_runs": 60
   },
   "Comune di Gesualdo": {
-    "runs": 59,
+    "runs": 60,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 59
+    "zero_runs": 60
   },
   "Comune di Grottaminarda": {
-    "runs": 59,
-    "results": 20,
+    "runs": 60,
+    "results": 21,
     "relevant": 1,
-    "zero_runs": 2
+    "zero_runs": 0
   },
   "Comune di Melito Irpino": {
-    "runs": 59,
+    "runs": 60,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 59
+    "zero_runs": 60
   },
   "Comune di Sturno": {
-    "runs": 59,
+    "runs": 60,
     "results": 0,
     "relevant": 0,
-    "zero_runs": 59
+    "zero_runs": 60
   }
 }
